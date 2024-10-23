@@ -2,9 +2,12 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <variant>
+#include <memory>
 using namespace std;
 
-#define element variant<int, string, Obj>
+class Obj;
+class element;
 
 string readString(string s, int &i) {
     string res = "";
@@ -30,28 +33,33 @@ int readInt(string s, int &i) {
     return res;
 }
 
+class element {
+public:
+    variant<int, string, shared_ptr<Obj> > val;
+};
+
 class Obj {
 public:
-    map<string, vector<element > > data;
+    map<string, vector<element> > data;
 };
 
 Obj parse(string s, int &i) {
     Obj res;
     string name;
-    vector<element > v;
-    element el;
+    vector<element> v;
     while (s[i] != '}' && i < s.length()) {
         if (s[i] == '"') {
             name = readString(s, i);
             while (s[i] != ']') {
+                element el;
                 if (isdigit(s[i])) {
-                    el = readInt(s, i);
+                    el.val = readInt(s, i);
                     v.push_back(el);
                 } else if (s[i] == '"') {
-                    el = readString(s, i);
+                    el.val = readString(s, i);
                     v.push_back(el);
                 } else if (s[i] == '{') {
-                    el = parse(s, i);
+                    el.val = make_shared<Obj>(parse(s, i));
                     v.push_back(el);
                 } else {
                     i++;
@@ -73,12 +81,12 @@ string to_string(Obj obj) {
     for (auto i: obj.data) {
         res += "\"" + i.first + "\":[";
         for (int j = 0; j < i.second.size(); j++) {
-            if (holds_alternative<int>(i.second[j])) {
-                res += to_string(get<int>(i.second[j])) + ",";
-            } else if (holds_alternative<string>(i.second[j])) {
-                res += "\"" + get<string>(i.second[j]) + "\",";
-            } else if (holds_alternative<Obj>(i.second[j])) {
-                res += to_string(get<Obj>(i.second[j])) + ",";
+            if (holds_alternative<int>(i.second[j].val)) {
+                res += to_string(get<int>(i.second[j].val)) + ",";
+            } else if (holds_alternative<string>(i.second[j].val)) {
+                res += "\"" + get<string>(i.second[j].val) + "\",";
+            } else if (holds_alternative<shared_ptr<Obj> >(i.second[j].val)) {
+                res += to_string(*get<shared_ptr<Obj> >(i.second[j].val)) + ",";
             }
         }
         res.pop_back();
@@ -97,9 +105,8 @@ int main() {
     int i = 0;
 
     obj = parse(s, i);
-
     out = to_string(obj);
     cout << out << endl;
-    out = to_string(get<Obj>(obj.data["aca"][1]));
+    out = to_string(*get<shared_ptr<Obj> >(obj.data["aca"][1].val));
     cout << out << endl;
 }
