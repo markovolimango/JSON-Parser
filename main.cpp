@@ -131,26 +131,31 @@ string to_string(const vector<element> &v);
 string to_string(const element &el) {
     string res;
     if (holds_alternative<int>(el.val)) {
-        res += to_string(get<int>(el.val)) + ",";
+        res += to_string(get<int>(el.val));
     } else if (holds_alternative<float>(el.val)) {
-        res += to_string(get<float>(el.val)) + ",";
+        res += to_string(get<float>(el.val));
     } else if (holds_alternative<string>(el.val)) {
-        res += "\"" + get<string>(el.val) + "\",";
+        res += "\"" + get<string>(el.val) + "\"";
     } else if (holds_alternative<shared_ptr<Obj> >(el.val)) {
-        res += to_string(*get<shared_ptr<Obj> >(el.val)) + ",";
+        res += to_string(*get<shared_ptr<Obj> >(el.val));
     } else if (holds_alternative<vector<element> >(el.val)) {
-        res += to_string(get<vector<element> >(el.val)) + ",";
+        res += to_string(get<vector<element> >(el.val));
     }
     return res;
 }
 
 string to_string(const vector<element> &v) {
     string res;
+    if (v.size() == 1) {
+        res += to_string(v[0]);
+        return res;
+    }
     res += "[";
     for (const auto &el: v) {
-        res += to_string(el);
+        res += to_string(el) + ", ";
     }
     if (!v.empty()) {
+        res.pop_back();
         res.pop_back();
     }
     res += "]";
@@ -161,9 +166,10 @@ string to_string(const Obj &obj) {
     string res;
     res += "{";
     for (auto i: obj.data) {
-        res += "\"" + i.first + "\":" + to_string(i.second) + ",";
+        res += "\"" + i.first + "\": " + to_string(i.second) + ", ";
     }
     if (!obj.data.empty()) {
+        res.pop_back();
         res.pop_back();
     }
     res += "}";
