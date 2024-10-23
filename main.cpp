@@ -193,4 +193,8 @@ int main() {
 
     out = to_string(obj);
     cout << out << endl;
+
+    cout << get<int>((*get<shared_ptr<Obj> >(obj.data["a"][0].val)).data["b"][1].val);
+    string input = "a.b[1]";
+    i = 0;
 }
