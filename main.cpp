@@ -102,5 +102,4 @@ int main() {
     cout << out << endl;
     out = to_string(get<Obj>(obj.data["aca"][1]));
     cout << out << endl;
-    //cout << get<int>(get<Obj>(obj.data["aca"][1]).data["cica"][0]) << endl;
 }
