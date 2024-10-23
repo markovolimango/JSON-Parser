@@ -28,6 +28,26 @@ int readInt(string s, int &i) {
     return num;
 }
 
+variant<int, string> read(string s, int &i) {
+    if (s[i] == '"') {
+        string res = "";
+        i++;
+        while (s[i] != '"') {
+            res += s[i];
+            i++;
+        }
+        i++;
+        return res;
+    } else if (s[i] >= '0' && s[i] <= '9') {
+        int res = 0;
+        while (s[i] != ',' && s[i] != '}') {
+            res = res * 10 + (s[i] - '0');
+            i++;
+        }
+        return res;
+    }
+}
+
 class Obj {
 public:
     string name;
@@ -40,18 +60,41 @@ public:
         children = vector<Obj>();
     }
 
-    Obj(string name, int num) {
+    Obj(string name, variant<int, string> el) {
         this->name = name;
-        data = {num};
-        children = vector<Obj>();
-    }
-
-    Obj(string name, string str) {
-        this->name = name;
-        data = {str};
+        if (holds_alternative<int>(el)) {
+            data = {get<int>(el)};
+        } else if (holds_alternative<string>(el)) {
+            data = {get<string>(el)};
+        }
         children = vector<Obj>();
     }
 };
+
+void form(string s, int &i, Obj &parent) {
+    string name;
+    variant<int, string> res;
+
+    while (s[i] != '}' && i < s.size()) {
+        if (s[i] == '"') {
+            name = readStr(s, i);
+        } else if (s[i] == ':') {
+            i++;
+            if (s[i] == '{') {
+                Obj child(name);
+                i++;
+                form(s, i, child);
+                parent.children.push_back(child);
+                i++;
+            } else {
+                res = read(s, i);
+                parent.children.push_back(Obj(name, res));
+            }
+        } else {
+            i++;
+        }
+    }
+}
 
 string to_string(Obj obj) {
     string s = "\"" + obj.name + "\":";
@@ -73,35 +116,6 @@ string to_string(Obj obj) {
         s += "},";
     }
     return s;
-}
-
-void form(string s, int &i, Obj &parent) {
-    string name;
-    int num;
-    string str;
-
-    while (s[i] != '}' && i < s.size()) {
-        if (s[i] == '"') {
-            name = readStr(s, i);
-        } else if (s[i] == ':') {
-            i++;
-            if (isNum(s[i])) {
-                num = readInt(s, i);
-                parent.children.push_back(Obj(name, num));
-            } else if (s[i] == '"') {
-                str = readStr(s, i);
-                parent.children.push_back(Obj(name, str));
-            } else if (s[i] == '{') {
-                Obj child(name);
-                i++;
-                form(s, i, child);
-                parent.children.push_back(child);
-                i++;
-            }
-        } else {
-            i++;
-        }
-    }
 }
 
 int main() {
