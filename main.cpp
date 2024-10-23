@@ -8,11 +8,11 @@ using namespace std;
 class Obj;
 class element;
 
-Obj parse(string s, int &i);
+Obj parse(const string &s, int &i);
 
 class element {
 public:
-    variant<int, double, string, shared_ptr<Obj>, vector<element> > val;
+    variant<int, float, string, shared_ptr<Obj>, vector<element> > val;
 };
 
 class Obj {
@@ -31,17 +31,17 @@ string readString(const string &s, int &i) {
     return res;
 }
 
-variant<int, double> readNum(const string &s, int &i) {
-    double res = 0;
+variant<int, float> readNum(const string &s, int &i) {
+    float res = 0;
     while (isdigit(s[i])) {
-        res = res * 10 + static_cast<double>(s[i]) - '0';
+        res = res * 10 + static_cast<float>(s[i]) - '0';
         i++;
     }
     if (s[i] == '.') {
         i++;
-        double p = 10;
+        float p = 10;
         while (isdigit(s[i])) {
-            res += static_cast<double>(s[i] - '0') / p;
+            res += static_cast<float>(s[i] - '0') / p;
             p *= 10;
             i++;
         }
@@ -50,39 +50,69 @@ variant<int, double> readNum(const string &s, int &i) {
     return static_cast<int>(res);
 }
 
-vector<element> readVector(const string &s, int &i) {
-    i++;
-    vector<element> res;
-    while (s[i] != ']') {
-        element el;
-        if (isdigit(s[i])) {
-            if (variant<int, double> num = readNum(s, i); holds_alternative<double>(num)) {
-                el.val = get<double>(num);
-            } else {
-                el.val = get<int>(num);
-            }
-        } else if (s[i] == '"') {
-            el.val = readString(s, i);
-        } else if (s[i] == '{') {
-            el.val = make_shared<Obj>(parse(s, i));
-        } else if (s[i] == '[') {
-            el.val = readVector(s, i);
+vector<element> readVector(const string &s, int &i);
+
+element readElement(const string &s, int &i) {
+    element res;
+    if (isdigit(s[i])) {
+        if (variant<int, float> num = readNum(s, i); holds_alternative<float>(num)) {
+            res.val = get<float>(num);
         } else {
-            i++;
-            continue;
+            res.val = get<int>(num);
         }
+    } else if (s[i] == '"') {
+        res.val = readString(s, i);
+    } else if (s[i] == '{') {
+        res.val = make_shared<Obj>(parse(s, i));
+    } else if (s[i] == '[') {
+        res.val = readVector(s, i);
+    } else {
+        cerr << "Invalid character in JSON file." << endl;
+        exit(1);
+    }
+    return res;
+}
+
+vector<element> readVector(const string &s, int &i) {
+    vector<element> res;
+    if (s[i] != '[') {
+        res = {readElement(s, i)};
+        return res;
+    }
+    i++;
+    while (s[i] != ']') {
+        if (s[i] == ',') {
+            i++;
+            while (s[i] == ' ') {
+                i++;
+            }
+        }
+        element el = readElement(s, i);
         res.push_back(el);
+        while (s[i] == ' ') {
+            i++;
+        }
     }
     i++;
     return res;
 }
 
-Obj parse(string s, int &i) {
+Obj parse(const string &s, int &i) {
     Obj res;
     while (s[i] != '}' && i < s.length()) {
         if (s[i] == '"') {
             string name = readString(s, i);
+            while (s[i] != ':') {
+                if (s[i] != ' ') {
+                    cerr << "Missing ':' in JSON file." << endl;
+                    exit(1);
+                }
+                i++;
+            }
             i++;
+            while (s[i] == ' ') {
+                i++;
+            }
             vector<element> v = readVector(s, i);
             res.data[name] = v;
             v.clear();
@@ -96,21 +126,29 @@ Obj parse(string s, int &i) {
 
 string to_string(const Obj &);
 
+string to_string(const vector<element> &v);
+
+string to_string(const element &el) {
+    string res;
+    if (holds_alternative<int>(el.val)) {
+        res += to_string(get<int>(el.val)) + ",";
+    } else if (holds_alternative<float>(el.val)) {
+        res += to_string(get<float>(el.val)) + ",";
+    } else if (holds_alternative<string>(el.val)) {
+        res += "\"" + get<string>(el.val) + "\",";
+    } else if (holds_alternative<shared_ptr<Obj> >(el.val)) {
+        res += to_string(*get<shared_ptr<Obj> >(el.val)) + ",";
+    } else if (holds_alternative<vector<element> >(el.val)) {
+        res += to_string(get<vector<element> >(el.val)) + ",";
+    }
+    return res;
+}
+
 string to_string(const vector<element> &v) {
     string res;
     res += "[";
-    for (const auto &[val]: v) {
-        if (holds_alternative<int>(val)) {
-            res += to_string(get<int>(val)) + ",";
-        } else if (holds_alternative<double>(val)) {
-            res += to_string(get<double>(val)) + ",";
-        } else if (holds_alternative<string>(val)) {
-            res += "\"" + get<string>(val) + "\",";
-        } else if (holds_alternative<shared_ptr<Obj> >(val)) {
-            res += to_string(*get<shared_ptr<Obj> >(val)) + ",";
-        } else if (holds_alternative<vector<element> >(val)) {
-            res += to_string(get<vector<element> >(val)) + ",";
-        }
+    for (const auto &el: v) {
+        res += to_string(el);
     }
     if (!v.empty()) {
         res.pop_back();
@@ -123,18 +161,12 @@ string to_string(const Obj &obj) {
     string res;
     res += "{";
     for (auto i: obj.data) {
-        res += "\"" + i.first + "\":";
-        res += to_string(i.second);
+        res += "\"" + i.first + "\":" + to_string(i.second) + ",";
     }
     if (!obj.data.empty()) {
         res.pop_back();
     }
     res += "}";
-    return res;
-}
-
-string format(string s) {
-    string res = "";
     return res;
 }
 
