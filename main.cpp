@@ -10,7 +10,7 @@ class Obj;
 class element;
 
 string readString(string s, int &i) {
-    string res = "";
+    string res;
     if (s[i] != '"') {
         cerr << "Error in readString()" << endl;
         exit(1);
@@ -24,7 +24,7 @@ string readString(string s, int &i) {
     return res;
 }
 
-int readInt(string s, int &i) {
+int readInt(const string &s, int &i) {
     int res = 0;
     while (isdigit(s[i])) {
         res = res * 10 + s[i] - '0';
@@ -35,7 +35,7 @@ int readInt(string s, int &i) {
 
 class element {
 public:
-    variant<int, string, shared_ptr<Obj> > val;
+    variant<int, string, shared_ptr<Obj>, vector<element> > val;
 };
 
 class Obj {
@@ -50,6 +50,7 @@ Obj parse(string s, int &i) {
     while (s[i] != '}' && i < s.length()) {
         if (s[i] == '"') {
             name = readString(s, i);
+            i += 2;
             while (s[i] != ']') {
                 element el;
                 if (isdigit(s[i])) {
@@ -60,6 +61,25 @@ Obj parse(string s, int &i) {
                     v.push_back(el);
                 } else if (s[i] == '{') {
                     el.val = make_shared<Obj>(parse(s, i));
+                    v.push_back(el);
+                } else if (s[i] == '[') {
+                    i++;
+                    vector<element> vec;
+                    while (s[i] != ']') {
+                        element inner_el;
+                        if (isdigit(s[i])) {
+                            inner_el.val = readInt(s, i);
+                        } else if (s[i] == '"') {
+                            inner_el.val = readString(s, i);
+                        } else if (s[i] == '{') {
+                            inner_el.val = make_shared<Obj>(parse(s, i));
+                        } else {
+                            i++;
+                            continue;
+                        }
+                        vec.push_back(inner_el);
+                    }
+                    el.val = vec;
                     v.push_back(el);
                 } else {
                     i++;
@@ -75,6 +95,29 @@ Obj parse(string s, int &i) {
     return res;
 }
 
+string to_string(Obj);
+
+string to_string(vector<element> vec) {
+    string res = "";
+    res += "[";
+    for (const auto &el: vec) {
+        if (holds_alternative<int>(el.val)) {
+            res += to_string(get<int>(el.val)) + ",";
+        } else if (holds_alternative<string>(el.val)) {
+            res += "\"" + get<string>(el.val) + "\",";
+        } else if (holds_alternative<shared_ptr<Obj> >(el.val)) {
+            res += to_string(*get<shared_ptr<Obj> >(el.val)) + ",";
+        } else if (holds_alternative<vector<element> >(el.val)) {
+            res += to_string(get<vector<element> >(el.val)) + ",";
+        }
+    }
+    if (!vec.empty()) {
+        res.pop_back();
+    }
+    res += "],";
+    return res;
+}
+
 string to_string(Obj obj) {
     string res = "";
     res += "{";
@@ -87,13 +130,25 @@ string to_string(Obj obj) {
                 res += "\"" + get<string>(i.second[j].val) + "\",";
             } else if (holds_alternative<shared_ptr<Obj> >(i.second[j].val)) {
                 res += to_string(*get<shared_ptr<Obj> >(i.second[j].val)) + ",";
+            } else if (holds_alternative<vector<element> >(i.second[j].val)) {
+                const auto &vec = get<vector<element> >(i.second[j].val);
+                res += to_string(vec);
             }
         }
-        res.pop_back();
+        if (!i.second.empty()) {
+            res.pop_back();
+        }
         res += "],";
     }
-    res.pop_back();
+    if (!obj.data.empty()) {
+        res.pop_back();
+    }
     res += "}";
+    return res;
+}
+
+string format(string s) {
+    string res = "";
     return res;
 }
 
@@ -105,8 +160,8 @@ int main() {
     int i = 0;
 
     obj = parse(s, i);
+
     out = to_string(obj);
     cout << out << endl;
-    out = to_string(*get<shared_ptr<Obj> >(obj.data["aca"][1].val));
-    cout << out << endl;
 }
+
