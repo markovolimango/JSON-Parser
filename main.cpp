@@ -113,7 +113,6 @@ int main() {
     int i = 1;
     form(s, i, root);
     cout << to_string(root) << endl;
-    //komentar
 
     myFile.close();
     return 0;
