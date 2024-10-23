@@ -1,0 +1,3 @@
+/Users/marko/CLionProjects/Internship/cmake-build-debug/CMakeFiles/Internship.dir
+/Users/marko/CLionProjects/Internship/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/marko/CLionProjects/Internship/cmake-build-debug/CMakeFiles/rebuild_cache.dir
