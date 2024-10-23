@@ -12,7 +12,7 @@ Obj parse(string s, int &i);
 
 class element {
 public:
-    variant<int, float, string, shared_ptr<Obj>, vector<element> > val;
+    variant<int, double, string, shared_ptr<Obj>, vector<element> > val;
 };
 
 class Obj {
@@ -31,17 +31,17 @@ string readString(const string &s, int &i) {
     return res;
 }
 
-variant<int, float> readNum(const string &s, int &i) {
-    float res = 0;
+variant<int, double> readNum(const string &s, int &i) {
+    double res = 0;
     while (isdigit(s[i])) {
-        res = res * 10 + static_cast<float>(s[i]) - '0';
+        res = res * 10 + static_cast<double>(s[i]) - '0';
         i++;
     }
     if (s[i] == '.') {
         i++;
-        float p = 10;
+        double p = 10;
         while (isdigit(s[i])) {
-            res += static_cast<float>(s[i] - '0') / p;
+            res += static_cast<double>(s[i] - '0') / p;
             p *= 10;
             i++;
         }
@@ -56,8 +56,8 @@ vector<element> readVector(const string &s, int &i) {
     while (s[i] != ']') {
         element el;
         if (isdigit(s[i])) {
-            if (variant<int, float> num = readNum(s, i); holds_alternative<float>(num)) {
-                el.val = get<float>(num);
+            if (variant<int, double> num = readNum(s, i); holds_alternative<double>(num)) {
+                el.val = get<double>(num);
             } else {
                 el.val = get<int>(num);
             }
@@ -79,32 +79,11 @@ vector<element> readVector(const string &s, int &i) {
 
 Obj parse(string s, int &i) {
     Obj res;
-    string name;
-    vector<element> v;
     while (s[i] != '}' && i < s.length()) {
         if (s[i] == '"') {
-            name = readString(s, i);
-            i += 2;
-            while (s[i] != ']') {
-                element el;
-                if (isdigit(s[i])) {
-                    if (variant<int, float> num = readNum(s, i); holds_alternative<float>(num)) {
-                        el.val = get<float>(num);
-                    } else {
-                        el.val = get<int>(num);
-                    }
-                } else if (s[i] == '"') {
-                    el.val = readString(s, i);
-                } else if (s[i] == '{') {
-                    el.val = make_shared<Obj>(parse(s, i));
-                } else if (s[i] == '[') {
-                    el.val = readVector(s, i);
-                } else {
-                    i++;
-                    continue;
-                }
-                v.push_back(el);
-            }
+            string name = readString(s, i);
+            i++;
+            vector<element> v = readVector(s, i);
             res.data[name] = v;
             v.clear();
         } else {
@@ -123,8 +102,8 @@ string to_string(const vector<element> &v) {
     for (const auto &[val]: v) {
         if (holds_alternative<int>(val)) {
             res += to_string(get<int>(val)) + ",";
-        } else if (holds_alternative<float>(val)) {
-            res += to_string(get<float>(val)) + ",";
+        } else if (holds_alternative<double>(val)) {
+            res += to_string(get<double>(val)) + ",";
         } else if (holds_alternative<string>(val)) {
             res += "\"" + get<string>(val) + "\",";
         } else if (holds_alternative<shared_ptr<Obj> >(val)) {
@@ -144,25 +123,8 @@ string to_string(const Obj &obj) {
     string res;
     res += "{";
     for (auto i: obj.data) {
-        res += "\"" + i.first + "\":[";
-        for (auto &j: i.second) {
-            if (holds_alternative<int>(j.val)) {
-                res += to_string(get<int>(j.val)) + ",";
-            } else if (holds_alternative<float>(j.val)) {
-                res += to_string(get<float>(j.val)) + ",";
-            } else if (holds_alternative<string>(j.val)) {
-                res += "\"" + get<string>(j.val) + "\",";
-            } else if (holds_alternative<shared_ptr<Obj> >(j.val)) {
-                res += to_string(*get<shared_ptr<Obj> >(j.val)) + ",";
-            } else if (holds_alternative<vector<element> >(j.val)) {
-                const auto &vec = get<vector<element> >(j.val);
-                res += to_string(vec) + ",";
-            }
-        }
-        if (!i.second.empty()) {
-            res.pop_back();
-        }
-        res += "],";
+        res += "\"" + i.first + "\":";
+        res += to_string(i.second);
     }
     if (!obj.data.empty()) {
         res.pop_back();
@@ -188,4 +150,3 @@ int main() {
     out = to_string(obj);
     cout << out << endl;
 }
-
