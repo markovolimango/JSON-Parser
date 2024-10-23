@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
 #include <vector>
 #include <variant>
@@ -67,7 +68,7 @@ element readElement(const string &s, int &i) {
     } else if (s[i] == '[') {
         res.val = readVector(s, i);
     } else {
-        cerr << "Invalid character in JSON file." << endl;
+        cerr << "Invalid character in JSON file. " << i << endl;
         exit(1);
     }
     return res;
@@ -80,16 +81,19 @@ vector<element> readVector(const string &s, int &i) {
         return res;
     }
     i++;
+    while (s[i] == ' ' || s[i] == '\n') {
+        i++;
+    }
     while (s[i] != ']') {
         if (s[i] == ',') {
             i++;
-            while (s[i] == ' ') {
+            while (s[i] == ' ' || s[i] == '\n') {
                 i++;
             }
         }
         element el = readElement(s, i);
         res.push_back(el);
-        while (s[i] == ' ') {
+        while (s[i] == ' ' || s[i] == '\n') {
             i++;
         }
     }
@@ -103,14 +107,14 @@ Obj parse(const string &s, int &i) {
         if (s[i] == '"') {
             string name = readString(s, i);
             while (s[i] != ':') {
-                if (s[i] != ' ') {
+                if (s[i] != ' ' || s[i] != '\n') {
                     cerr << "Missing ':' in JSON file." << endl;
                     exit(1);
                 }
                 i++;
             }
             i++;
-            while (s[i] == ' ') {
+            while (s[i] == ' ' || s[i] == '\n') {
                 i++;
             }
             vector<element> v = readVector(s, i);
@@ -165,7 +169,7 @@ string to_string(const vector<element> &v) {
 string to_string(const Obj &obj) {
     string res;
     res += "{";
-    for (auto i: obj.data) {
+    for (const auto &i: obj.data) {
         res += "\"" + i.first + "\": " + to_string(i.second) + ", ";
     }
     if (!obj.data.empty()) {
@@ -178,8 +182,10 @@ string to_string(const Obj &obj) {
 
 int main() {
     ifstream json("text.json");
-    string s, out;
-    getline(json, s);
+    stringstream buffer;
+    buffer << json.rdbuf();
+    string s = buffer.str();
+    string out;
     Obj obj;
     int i = 0;
 
