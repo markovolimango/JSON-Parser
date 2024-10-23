@@ -1,34 +1,40 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <vector>
+
 using namespace std;
 
-bool isNum(char c) {
-    return c >= '0' && c <= '9';
-}
+#define element variant<int, string, Obj>
 
-string readStr(string s, int &i) {
-    string res = "";
-    i++;
-    while (s[i] != '"') {
-        res += s[i];
-        i++;
+class Obj {
+public:
+    string name;
+    vector<element > data;
+    vector<Obj> children;
+
+    Obj() {
+        data = vector<element >();
+        children = vector<Obj>();
     }
-    i++;
 
-    return res;
-}
-
-int readInt(string s, int &i) {
-    int num = 0;
-    while (isNum(s[i])) {
-        num = num * 10 + (s[i] - '0');
-        i++;
+    Obj(string name) {
+        this->name = name;
+        data = vector<element >();
+        children = vector<Obj>();
     }
-    return num;
-}
 
-variant<int, string> read(string s, int &i) {
+    Obj(string name, element el) {
+        this->name = name;
+        if (holds_alternative<int>(el)) {
+            data = {get<int>(el)};
+        } else if (holds_alternative<string>(el)) {
+            data = {get<string>(el)};
+        }
+        children = vector<Obj>();
+    }
+};
+
+element read(string s, int &i) {
     if (s[i] == '"') {
         string res = "";
         i++;
@@ -48,36 +54,13 @@ variant<int, string> read(string s, int &i) {
     }
 }
 
-class Obj {
-public:
-    string name;
-    vector<variant<int, string, Obj> > data;
-    vector<Obj> children;
-
-    Obj(string name) {
-        this->name = name;
-        data = vector<variant<int, string, Obj> >();
-        children = vector<Obj>();
-    }
-
-    Obj(string name, variant<int, string> el) {
-        this->name = name;
-        if (holds_alternative<int>(el)) {
-            data = {get<int>(el)};
-        } else if (holds_alternative<string>(el)) {
-            data = {get<string>(el)};
-        }
-        children = vector<Obj>();
-    }
-};
-
 void form(string s, int &i, Obj &parent) {
     string name;
-    variant<int, string> res;
+    variant<int, string, Obj> res;
 
     while (s[i] != '}' && i < s.size()) {
         if (s[i] == '"') {
-            name = readStr(s, i);
+            name = get<string>(read(s, i));
         } else if (s[i] == ':') {
             i++;
             if (s[i] == '{') {
