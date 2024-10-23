@@ -1,116 +1,106 @@
-#include <fstream>
 #include <iostream>
+#include <fstream>
+#include <map>
 #include <vector>
-
 using namespace std;
 
 #define element variant<int, string, Obj>
 
-class Obj {
-public:
-    string name;
-    vector<element > data;
-    vector<Obj> children;
-
-    Obj() {
-        data = vector<element >();
-        children = vector<Obj>();
+string readString(string s, int &i) {
+    string res = "";
+    if (s[i] != '"') {
+        cerr << "Error in readString()" << endl;
+        exit(1);
     }
-
-    Obj(string name) {
-        this->name = name;
-        data = vector<element >();
-        children = vector<Obj>();
-    }
-
-    Obj(string name, element el) {
-        this->name = name;
-        if (holds_alternative<int>(el)) {
-            data = {get<int>(el)};
-        } else if (holds_alternative<string>(el)) {
-            data = {get<string>(el)};
-        }
-        children = vector<Obj>();
-    }
-};
-
-element read(string s, int &i) {
-    if (s[i] == '"') {
-        string res = "";
+    i++;
+    while (s[i] != '"') {
+        res += s[i];
         i++;
-        while (s[i] != '"') {
-            res += s[i];
-            i++;
-        }
-        i++;
-        return res;
-    } else if (s[i] >= '0' && s[i] <= '9') {
-        int res = 0;
-        while (s[i] != ',' && s[i] != '}') {
-            res = res * 10 + (s[i] - '0');
-            i++;
-        }
-        return res;
     }
+    i++;
+    return res;
 }
 
-void form(string s, int &i, Obj &parent) {
-    string name;
-    variant<int, string, Obj> res;
+int readInt(string s, int &i) {
+    int res = 0;
+    while (isdigit(s[i])) {
+        res = res * 10 + s[i] - '0';
+        i++;
+    }
+    return res;
+}
 
-    while (s[i] != '}' && i < s.size()) {
+class Obj {
+public:
+    map<string, vector<element > > data;
+};
+
+Obj parse(string s, int &i) {
+    Obj res;
+    string name;
+    vector<element > v;
+    element el;
+    while (s[i] != '}' && i < s.length()) {
         if (s[i] == '"') {
-            name = get<string>(read(s, i));
-        } else if (s[i] == ':') {
-            i++;
-            if (s[i] == '{') {
-                Obj child(name);
-                i++;
-                form(s, i, child);
-                parent.children.push_back(child);
-                i++;
-            } else {
-                res = read(s, i);
-                parent.children.push_back(Obj(name, res));
+            name = readString(s, i);
+            while (s[i] != ']') {
+                if (isdigit(s[i])) {
+                    el = readInt(s, i);
+                    v.push_back(el);
+                } else if (s[i] == '"') {
+                    el = readString(s, i);
+                    v.push_back(el);
+                } else if (s[i] == '{') {
+                    el = parse(s, i);
+                    v.push_back(el);
+                } else {
+                    i++;
+                }
             }
+            res.data[name] = v;
+            v.clear();
         } else {
             i++;
         }
     }
+    i++;
+    return res;
 }
 
 string to_string(Obj obj) {
-    string s = "\"" + obj.name + "\":";
-    if (!obj.data.empty()) {
-        for (int i = 0; i < obj.data.size(); i++) {
-            if (holds_alternative<int>(obj.data[i])) {
-                s += to_string(get<int>(obj.data[i])) + ",";
-            }
-            if (holds_alternative<string>(obj.data[i])) {
-                s += "\"" + get<string>(obj.data[i]) + "\",";
+    string res = "";
+    res += "{";
+    for (auto i: obj.data) {
+        res += "\"" + i.first + "\":[";
+        for (int j = 0; j < i.second.size(); j++) {
+            if (holds_alternative<int>(i.second[j])) {
+                res += to_string(get<int>(i.second[j])) + ",";
+            } else if (holds_alternative<string>(i.second[j])) {
+                res += "\"" + get<string>(i.second[j]) + "\",";
+            } else if (holds_alternative<Obj>(i.second[j])) {
+                res += to_string(get<Obj>(i.second[j])) + ",";
             }
         }
+        res.pop_back();
+        res += "],";
     }
-    if (!obj.children.empty()) {
-        s += "{";
-        for (int i = 0; i < obj.children.size(); i++) {
-            s += to_string(obj.children[i]);
-        }
-        s += "},";
-    }
-    return s;
+    res.pop_back();
+    res += "}";
+    return res;
 }
 
 int main() {
-    ifstream myFile("text.json");
-    string s;
-    getline(myFile, s);
+    ifstream json("text.json");
+    string s, out;
+    getline(json, s);
+    Obj obj;
+    int i = 0;
 
-    Obj root("root");
-    int i = 1;
-    form(s, i, root);
-    cout << to_string(root) << endl;
+    obj = parse(s, i);
 
-    myFile.close();
-    return 0;
+    out = to_string(obj);
+    cout << out << endl;
+    out = to_string(get<Obj>(obj.data["aca"][1]));
+    cout << out << endl;
+    //cout << get<int>(get<Obj>(obj.data["aca"][1]).data["cica"][0]) << endl;
 }
