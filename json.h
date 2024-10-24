@@ -17,7 +17,7 @@ namespace json {
 
     class Object {
     public:
-        std::map<std::string, std::vector<Element> > data;
+        std::map<std::string, Element> data;
     };
 
     std::variant<int, float> readNumber(const std::string &text, int &pos);

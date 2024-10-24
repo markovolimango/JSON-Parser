@@ -57,10 +57,6 @@ namespace json {
 
     std::vector<Element> readVector(const std::string &text, int &pos) {
         std::vector<Element> res;
-        if (text[pos] != '[') {
-            res = {readElement(text, pos)};
-            return res;
-        }
         pos++;
         while (text[pos] == ' ' || text[pos] == '\n') {
             pos++;
@@ -95,9 +91,8 @@ namespace json {
                 while (text[pos] == ' ' || text[pos] == '\n') {
                     pos++;
                 }
-                std::vector<Element> v = readVector(text, pos);
-                res.data[name] = v;
-                v.clear();
+                Element element = readElement(text, pos);
+                res.data[name] = element;
             } else {
                 pos++;
             }
