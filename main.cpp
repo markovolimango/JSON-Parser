@@ -1,28 +1,21 @@
-#include <iostream>
 #include <fstream>
 #include <sstream>
-#include <map>
-#include <vector>
-#include <variant>
 #include "json.h"
-using namespace std;
-using namespace json;
 
 int main() {
-    ifstream json("text.json");
-    stringstream buffer;
+    std::ifstream json("text.json");
+    std::stringstream buffer;
     buffer << json.rdbuf();
-    string s = buffer.str();
-    string out;
-    Obj obj;
+    std::string s = buffer.str();
+    std::string out;
+    json::Obj obj;
     int i = 0;
 
-    obj = parse(s, i);
+    obj = json::parse(s, i);
 
     out = to_string(obj);
-    cout << out << endl;
+    std::cout << out << std::endl;
 
-    cout << get<int>((*get<shared_ptr<Obj> >(obj.data["a"][0].val)).data["b"][1].val);
-    string input = "a.b[1]";
-    i = 0;
+    std::cout << std::get<int>(std::get<std::shared_ptr<json::Obj> >(obj.data["a"][0].val)->data["b"][1].val);
+    std::string input = "a.b[1]";
 }
