@@ -8,31 +8,31 @@
 #include <variant>
 
 namespace json {
-    class Obj;
+    class Object;
 
-    class element {
+    class Element {
     public:
-        std::variant<int, float, std::string, std::shared_ptr<Obj>, std::vector<element> > val;
+        std::variant<int, float, std::string, std::shared_ptr<Object>, std::vector<Element> > value;
     };
 
-    class Obj {
+    class Object {
     public:
-        std::map<std::string, std::vector<element> > data;
+        std::map<std::string, std::vector<Element> > data;
     };
 
-    std::variant<int, float> readNum(const std::string &s, int &i);
+    std::variant<int, float> readNumber(const std::string &text, int &pos);
 
-    std::string readString(const std::string &s, int &i);
+    std::string readString(const std::string &text, int &pos);
 
-    element readElement(const std::string &s, int &i);
+    Element readElement(const std::string &text, int &pos);
 
-    std::vector<element> readVector(const std::string &s, int &i);
+    std::vector<Element> readVector(const std::string &text, int &pos);
 
-    Obj parse(const std::string &s, int &i);
+    Object readObj(const std::string &text, int &pos);
 
-    std::string to_string(const element &el);
+    std::string to_string(const Element &element);
 
-    std::string to_string(const std::vector<element> &v);
+    std::string to_string(const std::vector<Element> &vec);
 
-    std::string to_string(const Obj &obj);
+    std::string to_string(const Object &object);
 }

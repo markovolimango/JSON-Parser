@@ -1,138 +1,138 @@
 #include "json.h"
 
 namespace json {
-    std::variant<int, float> json::readNum(const std::string &s, int &i) {
+    std::variant<int, float> json::readNumber(const std::string &text, int &pos) {
         float res = 0;
-        while (isdigit(s[i])) {
-            res = res * 10 + static_cast<float>(s[i]) - '0';
-            i++;
+        while (isdigit(text[pos])) {
+            res = res * 10 + static_cast<float>(text[pos]) - '0';
+            pos++;
         }
-        if (s[i] == '.') {
-            i++;
-            float p = 10;
-            while (isdigit(s[i])) {
-                res += static_cast<float>(s[i] - '0') / p;
-                p *= 10;
-                i++;
+        if (text[pos] == '.') {
+            pos++;
+            float decimalPower = 10;
+            while (isdigit(text[pos])) {
+                res += static_cast<float>(text[pos] - '0') / decimalPower;
+                decimalPower *= 10;
+                pos++;
             }
             return res;
         }
         return static_cast<int>(res);
     }
 
-    std::string json::readString(const std::string &s, int &i) {
+    std::string json::readString(const std::string &text, int &pos) {
         std::string res;
-        i++;
-        while (s[i] != '"') {
-            res += s[i];
-            i++;
+        pos++;
+        while (text[pos] != '"') {
+            res += text[pos];
+            pos++;
         }
-        i++;
+        pos++;
         return res;
     }
 
-    Obj json::parse(const std::string &s, int &i) {
-        Obj res;
-        while (s[i] != '}' && i < s.length()) {
-            if (s[i] == '"') {
-                std::string name = readString(s, i);
-                while (s[i] != ':') {
-                    if (s[i] != ' ' || s[i] != '\n') {
+    Element readElement(const std::string &text, int &pos) {
+        Element res;
+        if (isdigit(text[pos])) {
+            if (std::variant<int, float> number = readNumber(text, pos); holds_alternative<float>(number)) {
+                res.value = get<float>(number);
+            } else {
+                res.value = get<int>(number);
+            }
+        } else if (text[pos] == '"') {
+            res.value = readString(text, pos);
+        } else if (text[pos] == '{') {
+            res.value = std::make_shared<Object>(readObj(text, pos));
+        } else if (text[pos] == '[') {
+            res.value = readVector(text, pos);
+        } else {
+            std::cerr << "Invalid character in JSON file. " << pos << std::endl;
+            exit(1);
+        }
+        while (text[pos] == ' ' || text[pos] == '\n') {
+            pos++;
+        }
+        return res;
+    }
+
+    std::vector<Element> readVector(const std::string &text, int &pos) {
+        std::vector<Element> res;
+        if (text[pos] != '[') {
+            res = {readElement(text, pos)};
+            return res;
+        }
+        pos++;
+        while (text[pos] == ' ' || text[pos] == '\n') {
+            pos++;
+        }
+        while (text[pos] != ']') {
+            if (text[pos] == ',') {
+                pos++;
+                while (text[pos] == ' ' || text[pos] == '\n') {
+                    pos++;
+                }
+            }
+            Element element = readElement(text, pos);
+            res.push_back(element);
+        }
+        pos++;
+        return res;
+    }
+
+    Object json::readObj(const std::string &text, int &pos) {
+        Object res;
+        while (text[pos] != '}' && pos < text.length()) {
+            if (text[pos] == '"') {
+                std::string name = readString(text, pos);
+                while (text[pos] != ':') {
+                    if (text[pos] != ' ' || text[pos] != '\n') {
                         std::cerr << "Missing ':' in JSON file." << std::endl;
                         exit(1);
                     }
-                    i++;
+                    pos++;
                 }
-                i++;
-                while (s[i] == ' ' || s[i] == '\n') {
-                    i++;
+                pos++;
+                while (text[pos] == ' ' || text[pos] == '\n') {
+                    pos++;
                 }
-                std::vector<element> v = readVector(s, i);
+                std::vector<Element> v = readVector(text, pos);
                 res.data[name] = v;
                 v.clear();
             } else {
-                i++;
+                pos++;
             }
         }
-        i++;
+        pos++;
         return res;
     }
 
-    element readElement(const std::string &s, int &i) {
-        element res;
-        if (isdigit(s[i])) {
-            if (std::variant<int, float> num = readNum(s, i); holds_alternative<float>(num)) {
-                res.val = get<float>(num);
-            } else {
-                res.val = get<int>(num);
-            }
-        } else if (s[i] == '"') {
-            res.val = readString(s, i);
-        } else if (s[i] == '{') {
-            res.val = std::make_shared<Obj>(parse(s, i));
-        } else if (s[i] == '[') {
-            res.val = readVector(s, i);
-        } else {
-            std::cerr << "Invalid character in JSON file. " << i << std::endl;
-            exit(1);
-        }
-        return res;
-    }
-
-    std::vector<element> readVector(const std::string &s, int &i) {
-        std::vector<element> res;
-        if (s[i] != '[') {
-            res = {readElement(s, i)};
-            return res;
-        }
-        i++;
-        while (s[i] == ' ' || s[i] == '\n') {
-            i++;
-        }
-        while (s[i] != ']') {
-            if (s[i] == ',') {
-                i++;
-                while (s[i] == ' ' || s[i] == '\n') {
-                    i++;
-                }
-            }
-            element el = readElement(s, i);
-            res.push_back(el);
-            while (s[i] == ' ' || s[i] == '\n') {
-                i++;
-            }
-        }
-        i++;
-        return res;
-    }
-
-    std::string to_string(const element &el) {
+    std::string to_string(const Element &element) {
         std::string res;
-        if (holds_alternative<int>(el.val)) {
-            res += std::to_string(get<int>(el.val));
-        } else if (holds_alternative<float>(el.val)) {
-            res += std::to_string(get<float>(el.val));
-        } else if (holds_alternative<std::string>(el.val)) {
-            res += "\"" + get<std::string>(el.val) + "\"";
-        } else if (holds_alternative<std::shared_ptr<Obj> >(el.val)) {
-            res += to_string(*get<std::shared_ptr<Obj> >(el.val));
-        } else if (holds_alternative<std::vector<element> >(el.val)) {
-            res += to_string(get<std::vector<element> >(el.val));
+        if (holds_alternative<int>(element.value)) {
+            res += std::to_string(get<int>(element.value));
+        } else if (holds_alternative<float>(element.value)) {
+            res += std::to_string(get<float>(element.value));
+        } else if (holds_alternative<std::string>(element.value)) {
+            res += "\"" + get<std::string>(element.value) + "\"";
+        } else if (holds_alternative<std::shared_ptr<Object> >(element.value)) {
+            res += to_string(*get<std::shared_ptr<Object> >(element.value));
+        } else if (holds_alternative<std::vector<Element> >(element.value)) {
+            res += to_string(get<std::vector<Element> >(element.value));
         }
         return res;
     }
 
-    std::string to_string(const std::vector<element> &v) {
+    std::string to_string(const std::vector<Element> &vec) {
         std::string res;
-        if (v.size() == 1) {
-            res += to_string(v[0]);
+        if (vec.size() == 1) {
+            res += to_string(vec[0]);
             return res;
         }
         res += "[";
-        for (const auto &el: v) {
-            res += to_string(el) + ", ";
+        for (const auto &element: vec) {
+            res += to_string(element) + ", ";
         }
-        if (!v.empty()) {
+        if (!vec.empty()) {
             res.pop_back();
             res.pop_back();
         }
@@ -140,13 +140,13 @@ namespace json {
         return res;
     }
 
-    std::string to_string(const Obj &obj) {
+    std::string to_string(const Object &object) {
         std::string res;
         res += "{";
-        for (const auto &[fst, snd]: obj.data) {
-            res += "\"" + fst + "\": " + to_string(snd) + ", ";
+        for (const auto &[name, element]: object.data) {
+            res += "\"" + name + "\": " + to_string(element) + ", ";
         }
-        if (!obj.data.empty()) {
+        if (!object.data.empty()) {
             res.pop_back();
             res.pop_back();
         }
