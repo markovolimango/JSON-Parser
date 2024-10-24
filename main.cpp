@@ -4,27 +4,34 @@
 
 #include "json.h"
 
-json::Element readInput(json::Element elem, std::string s, int i) {
+void readInput(json::Element &elem, const std::string &s, int &i) {
     while (i < s.size()) {
         if (s[i] == '.') {
             i++;
             std::string name;
-            name = s[i];
+            while (s[i] != '.' && s[i] != '[' && i < s.size()) {
+                name += s[i];
+                i++;
+            }
             elem = std::get<std::shared_ptr<json::Object> >(elem.value)->data[name];
-            i++;
         } else if (s[i] == '[') {
             i++;
-            int pos = s[i] - '0';
+            int pos = 0;
+            while (s[i] != ']') {
+                pos = pos * 10 + (s[i] - '0');
+                i++;
+            }
             if (std::holds_alternative<std::vector<json::Element> >(elem.value)) {
                 std::vector<json::Element> elems = std::get<std::vector<json::Element> >(elem.value);
                 elem = elems[pos];
             } else {
                 std::cout << "nema";
             }
-            i += 2;
+            i++;
+        } else {
+            i++;
         }
     }
-    return elem;
 }
 
 int main() {
@@ -37,11 +44,12 @@ int main() {
     int i = 0;
 
     obj = json::readObj(text, i);
+    std::cout << json::to_string(obj) << "\n";
 
-    std::string input = ".a.b[1]";
+    std::string input = ".aca[1].b[3][0]";
     json::Element elem;
     elem.value = std::make_shared<json::Object>(obj);
     i = 0;
-    elem = readInput(elem, input, i);
+    readInput(elem, input, i);
     std::cout << json::to_string(elem);
 }
