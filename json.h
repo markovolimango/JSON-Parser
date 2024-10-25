@@ -13,6 +13,18 @@ namespace json {
     class Element {
     public:
         std::variant<int, float, std::string, std::shared_ptr<Object>, std::vector<Element> > value;
+
+        bool isInt() const;
+
+        bool isFloat() const;
+
+        bool isNumber() const;
+
+        bool isString() const;
+
+        bool isObjectPtr() const;
+
+        bool isVector() const;
     };
 
     class Object {

@@ -1,6 +1,15 @@
 #include "json.h"
 
 namespace json {
+    bool Element::isInt() const {
+        return std::holds_alternative<int>(value);
+    }
+
+    bool Element::isString() const {
+        return std::holds_alternative<std::string>(value);
+    }
+
+
     void skipEmpty(const std::string &text, int &pos) {
         while (text[pos] == ' ' || text[pos] == '\n') {
             pos++;
