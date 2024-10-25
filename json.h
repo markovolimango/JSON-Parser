@@ -20,15 +20,17 @@ namespace json {
         std::map<std::string, Element> data;
     };
 
-    std::variant<int, float> readNumber(const std::string &text, int &pos);
+    void skipEmpty(const std::string &text, int &pos);
 
-    std::string readString(const std::string &text, int &pos);
+    std::variant<int, float> parseNumber(const std::string &text, int &pos);
 
-    Element readElement(const std::string &text, int &pos);
+    std::string parseString(const std::string &text, int &pos);
 
-    std::vector<Element> readVector(const std::string &text, int &pos);
+    Element parseElement(const std::string &text, int &pos);
 
-    Object readObj(const std::string &text, int &pos);
+    std::vector<Element> parseVector(const std::string &text, int &pos);
+
+    Object parseObject(const std::string &text, int &pos);
 
     std::string to_string(const Element &element);
 

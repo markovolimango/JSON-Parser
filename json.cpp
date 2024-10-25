@@ -1,8 +1,18 @@
 #include "json.h"
 
 namespace json {
-    std::variant<int, float> json::readNumber(const std::string &text, int &pos) {
-        float res = 0;
+    void skipEmpty(const std::string &text, int &pos) {
+        while (text[pos] == ' ' || text[pos] == '\n') {
+            pos++;
+        }
+    }
+
+    std::variant<int, float> json::parseNumber(const std::string &text, int &pos) {
+        float res = 0, sign = 1;
+        if (text[pos] == '-') {
+            pos++;
+            sign = -1;
+        }
         while (isdigit(text[pos])) {
             res = res * 10 + static_cast<float>(text[pos]) - '0';
             pos++;
@@ -15,12 +25,12 @@ namespace json {
                 decimalPower *= 10;
                 pos++;
             }
-            return res;
+            return res * sign;
         }
-        return static_cast<int>(res);
+        return static_cast<int>(res * sign);
     }
 
-    std::string json::readString(const std::string &text, int &pos) {
+    std::string json::parseString(const std::string &text, int &pos) {
         std::string res;
         pos++;
         while (text[pos] != '"') {
@@ -31,36 +41,32 @@ namespace json {
         return res;
     }
 
-    Element readElement(const std::string &text, int &pos) {
+    Element parseElement(const std::string &text, int &pos) {
         Element res;
-        if (isdigit(text[pos])) {
-            if (std::variant<int, float> number = readNumber(text, pos); holds_alternative<float>(number)) {
+        if (isdigit(text[pos]) || text[pos] == '-') {
+            if (std::variant<int, float> number = parseNumber(text, pos); holds_alternative<float>(number)) {
                 res.value = get<float>(number);
             } else {
                 res.value = get<int>(number);
             }
         } else if (text[pos] == '"') {
-            res.value = readString(text, pos);
+            res.value = parseString(text, pos);
         } else if (text[pos] == '{') {
-            res.value = std::make_shared<Object>(readObj(text, pos));
+            res.value = std::make_shared<Object>(parseObject(text, pos));
         } else if (text[pos] == '[') {
-            res.value = readVector(text, pos);
+            res.value = parseVector(text, pos);
         } else {
             std::cerr << "Invalid character in JSON file. " << pos << std::endl;
             exit(1);
         }
-        while (text[pos] == ' ' || text[pos] == '\n') {
-            pos++;
-        }
+        skipEmpty(text, pos);
         return res;
     }
 
-    std::vector<Element> readVector(const std::string &text, int &pos) {
+    std::vector<Element> parseVector(const std::string &text, int &pos) {
         std::vector<Element> res;
         pos++;
-        while (text[pos] == ' ' || text[pos] == '\n') {
-            pos++;
-        }
+        skipEmpty(text, pos);
         while (text[pos] != ']') {
             if (text[pos] == ',') {
                 pos++;
@@ -68,18 +74,18 @@ namespace json {
                     pos++;
                 }
             }
-            Element element = readElement(text, pos);
+            Element element = parseElement(text, pos);
             res.push_back(element);
         }
         pos++;
         return res;
     }
 
-    Object json::readObj(const std::string &text, int &pos) {
+    Object json::parseObject(const std::string &text, int &pos) {
         Object res;
         while (text[pos] != '}' && pos < text.length()) {
             if (text[pos] == '"') {
-                std::string name = readString(text, pos);
+                std::string name = parseString(text, pos);
                 while (text[pos] != ':') {
                     if (text[pos] != ' ' || text[pos] != '\n') {
                         std::cerr << "Missing ':' in JSON file." << std::endl;
@@ -91,7 +97,7 @@ namespace json {
                 while (text[pos] == ' ' || text[pos] == '\n') {
                     pos++;
                 }
-                Element element = readElement(text, pos);
+                Element element = parseElement(text, pos);
                 res.data[name] = element;
             } else {
                 pos++;
@@ -108,7 +114,7 @@ namespace json {
         } else if (holds_alternative<float>(element.value)) {
             res += std::to_string(get<float>(element.value));
         } else if (holds_alternative<std::string>(element.value)) {
-            res += "\"" + get<std::string>(element.value) + "\"";
+            res += get<std::string>(element.value);
         } else if (holds_alternative<std::shared_ptr<Object> >(element.value)) {
             res += to_string(*get<std::shared_ptr<Object> >(element.value));
         } else if (holds_alternative<std::vector<Element> >(element.value)) {
