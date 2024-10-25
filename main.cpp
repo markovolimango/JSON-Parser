@@ -7,14 +7,14 @@
 
 float getFloat(const json::Element &i) {
     float t;
-    if (!std::holds_alternative<float>(i.value)) {
-        if (!std::holds_alternative<int>(i.value)) {
+    if (!i.isFloat()) {
+        if (!i.isNumber()) {
             std::cerr << "Error: " << json::to_string(i) << "is not a number." << std::endl;
             exit(1);
         }
-        t = static_cast<float>(std::get<int>(i.value));
+        t = static_cast<float>(i.getInt());
     } else {
-        t = std::get<float>(i.value);
+        t = i.getFloat();
     }
     return t;
 }
@@ -66,13 +66,13 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
     if (s.substr(i, 4) == "max(") {
         i += 4;
         elem = readElement(obj, s, i);
-        if (std::holds_alternative<std::vector<json::Element> >(elem.value)) {
+        if (elem.isVector()) {
             if (s[i] == ',') {
                 std::cerr << "Error: " << json::to_string(elem) << " is not an number." <<
                         std::endl;
                 exit(1);
             }
-            elem.value = max(std::get<std::vector<json::Element> >(elem.value));
+            elem.value = max(elem.getVector());
         } else {
             float max, t = getFloat(elem);
             max = t;
@@ -97,13 +97,13 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
     if (s.substr(i, 4) == "min(") {
         i += 4;
         elem = readElement(obj, s, i);
-        if (std::holds_alternative<std::vector<json::Element> >(elem.value)) {
+        if (elem.isVector()) {
             if (s[i] == ',') {
                 std::cerr << "Error: Argument " << json::to_string(elem) << " of min() is not a number." <<
                         std::endl;
                 exit(1);
             }
-            elem.value = max(std::get<std::vector<json::Element> >(elem.value));
+            elem.value = max(elem.getVector());
         } else {
             float min, t = getFloat(elem);
             min = t;
@@ -141,9 +141,9 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
                 i++;
             } else {
                 json::Element e = readElement(obj, s, i);
-                if (!std::holds_alternative<int>(e.value)) {
-                    if (std::holds_alternative<float>(e.value)) {
-                        float t = std::get<float>(e.value);
+                if (!e.isInt()) {
+                    if (e.isFloat()) {
+                        float t = e.getFloat();
                         if (static_cast<int>(t) == t) {
                             pos = static_cast<int>(t);
                         } else {
@@ -155,10 +155,10 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
                         exit(1);
                     }
                 } else {
-                    pos = std::get<int>(e.value);
+                    pos = e.getInt();
                 }
             }
-            if (!std::holds_alternative<std::vector<json::Element> >(elem.value)) {
+            if (!elem.isVector()) {
                 std::cerr << "Error: " << json::to_string(elem) << " is not an array." << std::endl;
                 exit(1);
             }
@@ -166,7 +166,7 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
                 std::cerr << "Error: Array index " << pos << " is negative." << std::endl;
                 exit(1);
             }
-            auto elems = std::get<std::vector<json::Element> >(elem.value);
+            auto elems = elem.getVector();
             elem = elems[pos];
         } else {
             if (s[i] == '.') {

@@ -5,8 +5,44 @@ namespace json {
         return std::holds_alternative<int>(value);
     }
 
+    bool Element::isFloat() const {
+        return std::holds_alternative<float>(value);
+    }
+
+    bool Element::isNumber() const {
+        return std::holds_alternative<int>(value) || std::holds_alternative<float>(value);
+    }
+
     bool Element::isString() const {
         return std::holds_alternative<std::string>(value);
+    }
+
+    bool Element::isObjectPtr() const {
+        return std::holds_alternative<std::shared_ptr<Object> >(value);
+    }
+
+    bool Element::isVector() const {
+        return std::holds_alternative<std::vector<Element> >(value);
+    }
+
+    int Element::getInt() const {
+        return std::get<int>(value);
+    }
+
+    float Element::getFloat() const {
+        return std::get<float>(value);
+    }
+
+    std::string Element::getString() const {
+        return std::get<std::string>(value);
+    }
+
+    std::shared_ptr<Object> Element::getObjectPtr() const {
+        return std::get<std::shared_ptr<Object> >(value);
+    }
+
+    std::vector<Element> Element::getVector() const {
+        return std::get<std::vector<Element> >(value);
     }
 
 
@@ -118,15 +154,15 @@ namespace json {
 
     std::string to_string(const Element &element) {
         std::string res;
-        if (holds_alternative<int>(element.value)) {
+        if (element.isInt()) {
             res += std::to_string(get<int>(element.value));
-        } else if (holds_alternative<float>(element.value)) {
+        } else if (element.isFloat()) {
             res += std::to_string(get<float>(element.value));
-        } else if (holds_alternative<std::string>(element.value)) {
+        } else if (element.isString()) {
             res += get<std::string>(element.value);
-        } else if (holds_alternative<std::shared_ptr<Object> >(element.value)) {
+        } else if (element.isObjectPtr()) {
             res += to_string(*get<std::shared_ptr<Object> >(element.value));
-        } else if (holds_alternative<std::vector<Element> >(element.value)) {
+        } else if (element.isVector()) {
             res += to_string(get<std::vector<Element> >(element.value));
         }
         return res;

@@ -25,6 +25,16 @@ namespace json {
         bool isObjectPtr() const;
 
         bool isVector() const;
+
+        int getInt() const;
+
+        float getFloat() const;
+
+        std::string getString() const;
+
+        std::shared_ptr<Object> getObjectPtr() const;
+
+        std::vector<Element> getVector() const;
     };
 
     class Object {
