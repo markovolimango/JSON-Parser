@@ -142,7 +142,7 @@ namespace json {
                 while (text[pos] == ' ' || text[pos] == '\n') {
                     pos++;
                 }
-                Element element = parseElement(text, pos);
+                const Element element = parseElement(text, pos);
                 res.data[name] = element;
             } else {
                 pos++;
@@ -152,12 +152,25 @@ namespace json {
         return res;
     }
 
+    std::string to_string(const float &number) {
+        std::string res = std::to_string(number);
+        int pos = 0;
+        while (res.back() == '0' && pos < 6) {
+            res.pop_back();
+            pos++;
+        }
+        if (pos == 6) {
+            res.pop_back();
+        }
+        return res;
+    }
+
     std::string to_string(const Element &element) {
         std::string res;
         if (element.isInt()) {
-            res += std::to_string(get<int>(element.value));
+            res += std::to_string(element.getInt());
         } else if (element.isFloat()) {
-            res += std::to_string(get<float>(element.value));
+            res += to_string(element.getFloat());
         } else if (element.isString()) {
             res += get<std::string>(element.value);
         } else if (element.isObjectPtr()) {
@@ -197,6 +210,200 @@ namespace json {
             res.pop_back();
         }
         res += "}";
+        return res;
+    }
+
+    float makeFloat(const Element &element) {
+        float res;
+        if (!element.isFloat()) {
+            if (!element.isInt()) {
+                std::cerr << "Error: " << to_string(element) << " is not a number." << std::endl;
+                exit(1);
+            }
+            res = static_cast<float>(element.getInt());
+        } else {
+            res = element.getFloat();
+        }
+        return res;
+    }
+
+    float max(const std::vector<Element> &vec) {
+        float max = -1 * std::numeric_limits<float>::max();
+        for (const auto &element: vec) {
+            if (const float current = makeFloat(element); current > max) {
+                max = current;
+            }
+        }
+        return max;
+    }
+
+    float min(const std::vector<Element> &vec) {
+        float min = std::numeric_limits<float>::max();
+        for (const auto &element: vec) {
+            if (const float current = makeFloat(element); current < min) {
+                min = current;
+            }
+        }
+        return min;
+    }
+
+    std::variant<int, float> readNumber(const std::string &input, int &pos) {
+        return parseNumber(input, pos);
+    }
+
+    std::string readString(const std::string &input, int &pos) {
+        std::string res;
+        while (input[pos] != '.' && input[pos] != '[' && input[pos] != ']' && input[pos] != ')' && pos < input.size()) {
+            res += input[pos];
+            pos++;
+        }
+        return res;
+    }
+
+    float readMax(const Object &root, const std::string &input, int &pos) {
+        float res;
+        pos += 4;
+        if (Element element = readElement(root, input, pos); element.isVector()) {
+            res = max(element.getVector());
+        } else {
+            std::vector<Element> elements;
+            elements.push_back(element);
+            pos++;
+            while (input[pos] != ')' && pos < input.size()) {
+                if (input[pos] == ',') {
+                    pos++;
+                }
+                element = readElement(root, input, pos);
+                elements.push_back(element);
+            }
+            res = max(elements);
+        }
+        if (input[pos] == ')') {
+            pos++;
+        }
+        return res;
+    }
+
+    float readMin(const Object &root, const std::string &input, int &pos) {
+        float res;
+        pos += 4;
+        if (Element element = readElement(root, input, pos); element.isVector()) {
+            res = min(element.getVector());
+            pos++;
+        } else {
+            std::vector<Element> elements;
+            elements.push_back(element);
+            pos++;
+            while (input[pos] != ')' && pos < input.size()) {
+                if (input[pos] == ',') {
+                    pos++;
+                }
+                element = readElement(root, input, pos);
+                elements.push_back(element);
+            }
+            res = min(elements);
+        }
+        if (input[pos] == ')') {
+            pos++;
+        }
+        return res;
+    }
+
+    Element readElement(const Object &root, const std::string &input, int &pos) {
+        skipEmpty(input, pos);
+        Element res;
+        res.value = std::make_shared<Object>(root);
+        if (isdigit(input[pos]) || input[pos] == '-') {
+            if (std::variant<int, float> num = readNumber(input, pos); holds_alternative<float>(num)) {
+                res.value = std::get<float>(num);
+            } else if (holds_alternative<int>(num)) {
+                res.value = std::get<int>(num);
+            }
+        } else if (input.substr(pos, 4) == "max(") {
+            res.value = readMax(root, input, pos);
+        } else if (input.substr(pos, 4) == "min(") {
+            res.value = readMin(root, input, pos);
+        } else if (input.substr(pos, 5) == "size(") {
+            pos += 5;
+            int size;
+            res = readElement(root, input, pos);
+            if (res.isVector()) {
+                size = static_cast<int>(res.getVector().size());
+            } else if (res.isObjectPtr()) {
+                size = static_cast<int>(res.getObjectPtr()->data.size());
+            }
+            res.value = size;
+            if (input[pos] == ')') {
+                pos++;
+            }
+        } else {
+            while (pos < input.size() && input[pos] != ']' && input[pos] != ',' && input[pos] != ')') {
+                skipEmpty(input, pos);
+                if (input[pos] == '[') {
+                    pos++;
+                    int index;
+                    if (isdigit(input[pos]) || input[pos] == '-') {
+                        std::variant<int, float> number = readNumber(input, pos);
+                        if (!std::holds_alternative<int>(number)) {
+                            std::cerr << "Error: " << std::to_string(std::get<float>(number)) <<
+                                    " is not an integer." << std::endl;
+                            exit(1);
+                        }
+                        index = std::get<int>(number);
+                        pos++;
+                    } else {
+                        if (Element element = readElement(root, input, pos); !element.isInt()) {
+                            if (element.isFloat()) {
+                                if (float indexMaybe = element.getFloat(); to_string(indexMaybe) == std::to_string(
+                                                                               static_cast<int>(indexMaybe))) {
+                                    index = static_cast<int>(indexMaybe);
+                                } else {
+                                    std::cerr << "Error: " << to_string(element) << " is not an integer." <<
+                                            std::endl;
+                                    exit(1);
+                                }
+                            } else {
+                                std::cerr << "Error: " << to_string(element) << " is not an integer." <<
+                                        std::endl;
+                                exit(1);
+                            }
+                        } else {
+                            index = element.getInt();
+                        }
+                    }
+                    if (!res.isVector()) {
+                        std::cerr << "Error: " << to_string(res) << " is not an array." << std::endl;
+                        exit(1);
+                    }
+                    if (index < 0) {
+                        std::cerr << "Error: Array index " << index << " is negative." << std::endl;
+                        exit(1);
+                    }
+                    auto elements = res.getVector();
+                    res = elements[index];
+                } else {
+                    if (input[pos] == '.') {
+                        pos++;
+                    }
+                    std::string name = readString(input, pos);
+                    if (!res.isObjectPtr()) {
+                        std::cerr << "Error: " << to_string(res) << " is not an object." << std::endl;
+                        exit(1);
+                    }
+                    auto [data] = *std::get<std::shared_ptr<json::Object> >(res.value);
+                    if (!data.contains(name)) {
+                        std::cerr << "Error: " << json::to_string(res) << " does not contain object named " << name <<
+                                "." << std::endl;
+                        exit(1);
+                    }
+                    res = data[name];
+                }
+            }
+        }
+        if (input[pos] == ']') {
+            pos++;
+        }
+        skipEmpty(input, pos);
         return res;
     }
 }

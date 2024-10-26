@@ -54,9 +54,27 @@ namespace json {
 
     Object parseObject(const std::string &text, int &pos);
 
+    std::string to_string(const float &number);
+
     std::string to_string(const Element &element);
 
     std::string to_string(const std::vector<Element> &vec);
 
     std::string to_string(const Object &object);
+
+    float makeFloat(const json::Element &element);
+
+    float max(const std::vector<json::Element> &vec);
+
+    float min(const std::vector<json::Element> &vec);
+
+    std::variant<int, float> readNumber(const std::string &input, int &pos);
+
+    std::string readString(const std::string &input, int &pos);
+
+    float readMax(const json::Object &root, const std::string &input, int &pos);
+
+    float readMin(const json::Object &root, const std::string &input, int &pos);
+
+    json::Element readElement(const json::Object &root, const std::string &input, int &pos);
 }
