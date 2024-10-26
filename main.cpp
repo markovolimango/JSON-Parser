@@ -8,8 +8,8 @@
 float getFloat(const json::Element &i) {
     float t;
     if (!i.isFloat()) {
-        if (!i.isNumber()) {
-            std::cerr << "Error: " << json::to_string(i) << "is not a number." << std::endl;
+        if (!i.isInt()) {
+            std::cerr << "Error: " << json::to_string(i) << " is not a number." << std::endl;
             exit(1);
         }
         t = static_cast<float>(i.getInt());
@@ -30,7 +30,7 @@ float max(const std::vector<json::Element> &v) {
 }
 
 float min(const std::vector<json::Element> &v) {
-    float min = -1 * std::numeric_limits<float>::max();
+    float min = std::numeric_limits<float>::max();
     for (const auto &i: v) {
         if (const float t = getFloat(i); t < min) {
             min = t;
@@ -52,6 +52,61 @@ std::string readString(const std::string &s, int &i) {
     return res;
 }
 
+json::Element readElement(const json::Object &obj, const std::string &s, int &i);
+
+float readMax(const json::Object &obj, const std::string &s, int &i) {
+    json::Element elem;
+    std::vector<json::Element> elems;
+    float res;
+    i += 4;
+    elem = readElement(obj, s, i);
+    if (elem.isVector()) {
+        res = max(elem.getVector());
+    } else {
+        elems.push_back(elem);
+        i++;
+        while (s[i] != ')' && i < s.size()) {
+            if (s[i] == ',') {
+                i++;
+            }
+            elem = readElement(obj, s, i);
+            elems.push_back(elem);
+        }
+        res = max(elems);
+    }
+    if (s[i] == ')') {
+        i++;
+    }
+    return res;
+}
+
+float readMin(const json::Object &obj, const std::string &s, int &i) {
+    json::Element elem;
+    std::vector<json::Element> elems;
+    float res;
+    i += 4;
+    elem = readElement(obj, s, i);
+    if (elem.isVector()) {
+        res = min(elem.getVector());
+        i++;
+    } else {
+        elems.push_back(elem);
+        i++;
+        while (s[i] != ')' && i < s.size()) {
+            if (s[i] == ',') {
+                i++;
+            }
+            elem = readElement(obj, s, i);
+            elems.push_back(elem);
+        }
+        res = min(elems);
+    }
+    if (s[i] == ')') {
+        i++;
+    }
+    return res;
+}
+
 json::Element readElement(const json::Object &obj, const std::string &s, int &i) {
     json::Element elem;
     elem.value = std::make_shared<json::Object>(obj);
@@ -64,65 +119,23 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
         return elem;
     }
     if (s.substr(i, 4) == "max(") {
-        i += 4;
-        elem = readElement(obj, s, i);
-        if (elem.isVector()) {
-            if (s[i] == ',') {
-                std::cerr << "Error: " << json::to_string(elem) << " is not an number." <<
-                        std::endl;
-                exit(1);
-            }
-            elem.value = max(elem.getVector());
-        } else {
-            float max, t = getFloat(elem);
-            max = t;
-            i++;
-            while (s[i] != ')' && i < s.size()) {
-                if (s[i] == ',') {
-                    i++;
-                }
-                elem = readElement(obj, s, i);
-                t = getFloat(elem);
-                if (t > max) {
-                    max = t;
-                }
-            }
-            elem.value = max;
-        }
-        if (s[i] == ')') {
-            i++;
-        }
+        elem.value = readMax(obj, s, i);
         return elem;
     }
     if (s.substr(i, 4) == "min(") {
-        i += 4;
+        elem.value = readMin(obj, s, i);
+        return elem;
+    }
+    if (s.substr(i, 5) == "size(") {
+        i += 5;
+        int size;
         elem = readElement(obj, s, i);
         if (elem.isVector()) {
-            if (s[i] == ',') {
-                std::cerr << "Error: Argument " << json::to_string(elem) << " of min() is not a number." <<
-                        std::endl;
-                exit(1);
-            }
-            elem.value = max(elem.getVector());
-        } else {
-            float min, t = getFloat(elem);
-            min = t;
-            i++;
-            while (s[i] != ')' && i < s.size()) {
-                if (s[i] == ',') {
-                    i++;
-                }
-                elem = readElement(obj, s, i);
-                t = getFloat(elem);
-                if (t < min) {
-                    min = t;
-                }
-            }
-            elem.value = min;
+            size = static_cast<int>(elem.getVector().size());
+        } else if (elem.isObjectPtr()) {
+            size = static_cast<int>(elem.getObjectPtr()->data.size());
         }
-        if (s[i] == ')') {
-            i++;
-        }
+        elem.value = size;
         return elem;
     }
     while (i < s.size() && s[i] != ']' && s[i] != ',' && s[i] != ')') {
@@ -144,7 +157,7 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
                 if (!e.isInt()) {
                     if (e.isFloat()) {
                         float t = e.getFloat();
-                        if (static_cast<int>(t) == t) {
+                        if (floor(t) == t) {
                             pos = static_cast<int>(t);
                         } else {
                             std::cerr << "Error: " << json::to_string(e) << " is not an integer." << std::endl;
@@ -173,7 +186,7 @@ json::Element readElement(const json::Object &obj, const std::string &s, int &i)
                 i++;
             }
             std::string name = readString(s, i);
-            if (!std::holds_alternative<std::shared_ptr<json::Object> >(elem.value)) {
+            if (!elem.isObjectPtr()) {
                 std::cerr << "Error: " << json::to_string(elem) << " is not an object." << std::endl;
                 exit(1);
             }
@@ -203,9 +216,19 @@ int main() {
     int i = 0, j = 0;
     obj = json::parseObject(text, i);
 
-    std::string input;
-    std::cin >> input;
+    std::string s;
+    std::cin >> s;
     i = 0;
-    json::Element elem = readElement(obj, input, i);
-    std::cout << json::to_string(elem) << std::endl;
+    json::Element elem;
+    float res;
+    std::vector<json::Element> elems;
+
+    if (s[i] == ')') {
+        i++;
+    }
+    json::Element e = readElement(obj, s, i);
+    std::cout << json::to_string(e) << std::endl;
 }
+
+
+
