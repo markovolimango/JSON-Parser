@@ -61,6 +61,12 @@ build CMakeFiles/Internship.dir/json.cpp.o: CXX_COMPILER__Internship_unscanned_D
   OBJECT_DIR = CMakeFiles/Internship.dir
   OBJECT_FILE_DIR = CMakeFiles/Internship.dir
 
+build CMakeFiles/Internship.dir/test.cpp.o: CXX_COMPILER__Internship_unscanned_Debug /Users/marko/CLionProjects/Internship/test.cpp || cmake_object_order_depends_target_Internship
+  DEP_FILE = CMakeFiles/Internship.dir/test.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/Internship.dir
+  OBJECT_FILE_DIR = CMakeFiles/Internship.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Internship
@@ -69,7 +75,7 @@ build CMakeFiles/Internship.dir/json.cpp.o: CXX_COMPILER__Internship_unscanned_D
 #############################################
 # Link the executable Internship
 
-build Internship: CXX_EXECUTABLE_LINKER__Internship_Debug CMakeFiles/Internship.dir/main.cpp.o CMakeFiles/Internship.dir/json.cpp.o
+build Internship: CXX_EXECUTABLE_LINKER__Internship_Debug CMakeFiles/Internship.dir/main.cpp.o CMakeFiles/Internship.dir/json.cpp.o CMakeFiles/Internship.dir/test.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk
   OBJECT_DIR = CMakeFiles/Internship.dir
   POST_BUILD = :

@@ -79,6 +79,10 @@ namespace json {
         std::string res;
         pos++;
         while (text[pos] != '"') {
+            if (pos >= text.size()) {
+                std::cerr << "Error: Missing closing quotation mark in JSON." << std::endl;
+                exit(1);
+            }
             res += text[pos];
             pos++;
         }
@@ -101,7 +105,7 @@ namespace json {
         } else if (text[pos] == '[') {
             res.value = parseVector(text, pos);
         } else {
-            std::cerr << "Invalid character in JSON file. " << pos << std::endl;
+            std::cerr << "Error: Invalid character " << text[pos] << " in JSON." << std::endl;
             exit(1);
         }
         skipEmpty(text, pos);
@@ -113,11 +117,13 @@ namespace json {
         pos++;
         skipEmpty(text, pos);
         while (text[pos] != ']') {
+            if (pos >= text.size()) {
+                std::cerr << "Error: Missing closing square bracket in JSON." << std::endl;
+                exit(1);
+            }
             if (text[pos] == ',') {
                 pos++;
-                while (text[pos] == ' ' || text[pos] == '\n') {
-                    pos++;
-                }
+                skipEmpty(text, pos);
             }
             Element element = parseElement(text, pos);
             res.push_back(element);
@@ -128,12 +134,21 @@ namespace json {
 
     Object json::parseObject(const std::string &text, int &pos) {
         Object res;
-        while (text[pos] != '}' && pos < text.length()) {
+        skipEmpty(text, pos);
+        if (text[pos] != '{') {
+            std::cerr << "Error: Missing opening curly bracket in JSON." << std::endl;
+            exit(1);
+        }
+        while (text[pos] != '}') {
             if (text[pos] == '"') {
+                if (pos > text.size()) {
+                    std::cerr << "Error: Missing closing curly bracket in JSON." << std::endl;
+                    exit(1);
+                }
                 std::string name = parseString(text, pos);
                 while (text[pos] != ':') {
                     if (text[pos] != ' ' || text[pos] != '\n') {
-                        std::cerr << "Missing ':' in JSON file." << std::endl;
+                        std::cerr << "Missing colon in JSON file." << std::endl;
                         exit(1);
                     }
                     pos++;
@@ -148,7 +163,9 @@ namespace json {
                 pos++;
             }
         }
-        pos++;
+        if (text[pos] == '}') {
+            pos++;
+        }
         return res;
     }
 
@@ -217,7 +234,7 @@ namespace json {
         float res;
         if (!element.isFloat()) {
             if (!element.isInt()) {
-                std::cerr << "Error: " << to_string(element) << " is not a number." << std::endl;
+                std::cerr << "Error: " << to_string(element) << "in expression is not a number." << std::endl;
                 exit(1);
             }
             res = static_cast<float>(element.getInt());
@@ -346,7 +363,7 @@ namespace json {
                         std::variant<int, float> number = readNumber(input, pos);
                         if (!std::holds_alternative<int>(number)) {
                             std::cerr << "Error: " << std::to_string(std::get<float>(number)) <<
-                                    " is not an integer." << std::endl;
+                                    " in expression is not an integer." << std::endl;
                             exit(1);
                         }
                         index = std::get<int>(number);
@@ -358,12 +375,12 @@ namespace json {
                                                                                static_cast<int>(indexMaybe))) {
                                     index = static_cast<int>(indexMaybe);
                                 } else {
-                                    std::cerr << "Error: " << to_string(element) << " is not an integer." <<
-                                            std::endl;
+                                    std::cerr << "Error: " << to_string(element) << " in expression is not an integer."
+                                            << std::endl;
                                     exit(1);
                                 }
                             } else {
-                                std::cerr << "Error: " << to_string(element) << " is not an integer." <<
+                                std::cerr << "Error: " << to_string(element) << " in expression is not an integer." <<
                                         std::endl;
                                 exit(1);
                             }
@@ -372,11 +389,11 @@ namespace json {
                         }
                     }
                     if (!res.isVector()) {
-                        std::cerr << "Error: " << to_string(res) << " is not an array." << std::endl;
+                        std::cerr << "Error: " << to_string(res) << " in expression is not an array." << std::endl;
                         exit(1);
                     }
                     if (index < 0) {
-                        std::cerr << "Error: Array index " << index << " is negative." << std::endl;
+                        std::cerr << "Error: Array index " << index << " in expression is negative." << std::endl;
                         exit(1);
                     }
                     auto elements = res.getVector();
@@ -387,13 +404,13 @@ namespace json {
                     }
                     std::string name = readString(input, pos);
                     if (!res.isObjectPtr()) {
-                        std::cerr << "Error: " << to_string(res) << " is not an object." << std::endl;
+                        std::cerr << "Error: " << to_string(res) << " in expression is not an object." << std::endl;
                         exit(1);
                     }
                     auto [data] = *std::get<std::shared_ptr<json::Object> >(res.value);
                     if (!data.contains(name)) {
-                        std::cerr << "Error: " << json::to_string(res) << " does not contain object named " << name <<
-                                "." << std::endl;
+                        std::cerr << "Error: " << json::to_string(res) << " does not contain object named \"" << name <<
+                                "\"." << std::endl;
                         exit(1);
                     }
                     res = data[name];
