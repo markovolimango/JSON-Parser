@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: Internship
+# Project: JSON-Parser
 # Configurations: Debug
 # =============================================================================
 
@@ -41,41 +41,41 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = /Users/marko/CLionProjects/JSON-Parser/cmake-build-debug/
 # =============================================================================
-# Object build statements for EXECUTABLE target Internship
+# Object build statements for EXECUTABLE target JSON-Parser
 
 
 #############################################
-# Order-only phony target for Internship
+# Order-only phony target for JSON-Parser
 
-build cmake_object_order_depends_target_Internship: phony || .
+build cmake_object_order_depends_target_JSON-Parser: phony || .
 
-build CMakeFiles/Internship.dir/main.cpp.o: CXX_COMPILER__Internship_unscanned_Debug /Users/marko/CLionProjects/JSON-Parser/main.cpp || cmake_object_order_depends_target_Internship
-  DEP_FILE = CMakeFiles/Internship.dir/main.cpp.o.d
+build CMakeFiles/JSON-Parser.dir/main.cpp.o: CXX_COMPILER__JSON-Parser_unscanned_Debug /Users/marko/CLionProjects/JSON-Parser/main.cpp || cmake_object_order_depends_target_JSON-Parser
+  DEP_FILE = CMakeFiles/JSON-Parser.dir/main.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -fcolor-diagnostics
-  OBJECT_DIR = CMakeFiles/Internship.dir
-  OBJECT_FILE_DIR = CMakeFiles/Internship.dir
+  OBJECT_DIR = CMakeFiles/JSON-Parser.dir
+  OBJECT_FILE_DIR = CMakeFiles/JSON-Parser.dir
 
-build CMakeFiles/Internship.dir/json.cpp.o: CXX_COMPILER__Internship_unscanned_Debug /Users/marko/CLionProjects/JSON-Parser/json.cpp || cmake_object_order_depends_target_Internship
-  DEP_FILE = CMakeFiles/Internship.dir/json.cpp.o.d
+build CMakeFiles/JSON-Parser.dir/json.cpp.o: CXX_COMPILER__JSON-Parser_unscanned_Debug /Users/marko/CLionProjects/JSON-Parser/json.cpp || cmake_object_order_depends_target_JSON-Parser
+  DEP_FILE = CMakeFiles/JSON-Parser.dir/json.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -fcolor-diagnostics
-  OBJECT_DIR = CMakeFiles/Internship.dir
-  OBJECT_FILE_DIR = CMakeFiles/Internship.dir
+  OBJECT_DIR = CMakeFiles/JSON-Parser.dir
+  OBJECT_FILE_DIR = CMakeFiles/JSON-Parser.dir
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target Internship
+# Link build statements for EXECUTABLE target JSON-Parser
 
 
 #############################################
-# Link the executable Internship
+# Link the executable JSON-Parser
 
-build Internship: CXX_EXECUTABLE_LINKER__Internship_Debug CMakeFiles/Internship.dir/main.cpp.o CMakeFiles/Internship.dir/json.cpp.o
+build JSON-Parser: CXX_EXECUTABLE_LINKER__JSON-Parser_Debug CMakeFiles/JSON-Parser.dir/main.cpp.o CMakeFiles/JSON-Parser.dir/json.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk
-  OBJECT_DIR = CMakeFiles/Internship.dir
+  OBJECT_DIR = CMakeFiles/JSON-Parser.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = Internship
-  TARGET_PDB = Internship.dbg
+  TARGET_FILE = JSON-Parser
+  TARGET_PDB = JSON-Parser.dbg
 
 
 #############################################
@@ -111,7 +111,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /Users/marko/CLionProjects/JSON-Parser/cmake-build-debug
 
-build all: phony Internship
+build all: phony JSON-Parser
 
 # =============================================================================
 # Built-in targets

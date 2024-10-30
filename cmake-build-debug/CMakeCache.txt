@@ -146,7 +146,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=Internship
+CMAKE_PROJECT_NAME:STATIC=JSON-Parser
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib
@@ -221,6 +221,15 @@ Internship_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 Internship_SOURCE_DIR:STATIC=/Users/marko/CLionProjects/JSON-Parser
+
+//Value Computed by CMake
+JSON-Parser_BINARY_DIR:STATIC=/Users/marko/CLionProjects/JSON-Parser/cmake-build-debug
+
+//Value Computed by CMake
+JSON-Parser_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+JSON-Parser_SOURCE_DIR:STATIC=/Users/marko/CLionProjects/JSON-Parser
 
 
 ########################

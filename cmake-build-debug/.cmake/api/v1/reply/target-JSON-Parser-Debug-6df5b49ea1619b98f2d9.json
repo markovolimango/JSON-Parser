@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Internship"
+			"path" : "JSON-Parser"
 		}
 	],
 	"backtrace" : 1,
@@ -54,7 +54,7 @@
 			]
 		}
 	],
-	"id" : "Internship::@6890427a1f51a3e7e1df",
+	"id" : "JSON-Parser::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -70,8 +70,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "Internship",
-	"nameOnDisk" : "Internship",
+	"name" : "JSON-Parser",
+	"nameOnDisk" : "JSON-Parser",
 	"paths" : 
 	{
 		"build" : ".",

@@ -819,7 +819,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "Internship"
+			"value" : "JSON-Parser"
 		},
 		{
 			"name" : "CMAKE_RANLIB",
@@ -1143,6 +1143,42 @@
 		},
 		{
 			"name" : "Internship_SOURCE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/Users/marko/CLionProjects/JSON-Parser"
+		},
+		{
+			"name" : "JSON-Parser_BINARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/Users/marko/CLionProjects/JSON-Parser/cmake-build-debug"
+		},
+		{
+			"name" : "JSON-Parser_IS_TOP_LEVEL",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "ON"
+		},
+		{
+			"name" : "JSON-Parser_SOURCE_DIR",
 			"properties" : 
 			[
 				{

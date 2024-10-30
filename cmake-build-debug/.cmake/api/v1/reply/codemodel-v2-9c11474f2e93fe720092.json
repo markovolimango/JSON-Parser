@@ -27,7 +27,7 @@
 					[
 						0
 					],
-					"name" : "Internship",
+					"name" : "JSON-Parser",
 					"targetIndexes" : 
 					[
 						0
@@ -38,9 +38,9 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "Internship::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Internship-Debug-75a6676f608aeb1dd0ff.json",
-					"name" : "Internship",
+					"id" : "JSON-Parser::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-JSON-Parser-Debug-6df5b49ea1619b98f2d9.json",
+					"name" : "JSON-Parser",
 					"projectIndex" : 0
 				}
 			]
