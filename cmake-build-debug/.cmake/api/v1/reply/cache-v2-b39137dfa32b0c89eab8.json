@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/marko/CLionProjects/Internship/cmake-build-debug"
+			"value" : "/Users/marko/CLionProjects/JSON-Parser/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -479,7 +479,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/marko/CLionProjects/Internship/cmake-build-debug/CMakeFiles/pkgRedirects"
+			"value" : "/Users/marko/CLionProjects/JSON-Parser/cmake-build-debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -539,7 +539,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/marko/CLionProjects/Internship"
+			"value" : "/Users/marko/CLionProjects/JSON-Parser"
 		},
 		{
 			"name" : "CMAKE_INSTALL_NAME_TOOL",
@@ -1127,7 +1127,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/marko/CLionProjects/Internship/cmake-build-debug"
+			"value" : "/Users/marko/CLionProjects/JSON-Parser/cmake-build-debug"
 		},
 		{
 			"name" : "Internship_IS_TOP_LEVEL",
@@ -1151,7 +1151,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/marko/CLionProjects/Internship"
+			"value" : "/Users/marko/CLionProjects/JSON-Parser"
 		}
 	],
 	"kind" : "cache",
