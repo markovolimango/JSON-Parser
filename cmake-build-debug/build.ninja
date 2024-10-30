@@ -77,6 +77,43 @@ build JSON-Parser: CXX_EXECUTABLE_LINKER__JSON-Parser_Debug CMakeFiles/JSON-Pars
   TARGET_FILE = JSON-Parser
   TARGET_PDB = JSON-Parser.dbg
 
+# =============================================================================
+# Object build statements for EXECUTABLE target tests
+
+
+#############################################
+# Order-only phony target for tests
+
+build cmake_object_order_depends_target_tests: phony || .
+
+build CMakeFiles/tests.dir/tests.cpp.o: CXX_COMPILER__tests_unscanned_Debug /Users/marko/CLionProjects/JSON-Parser/tests.cpp || cmake_object_order_depends_target_tests
+  DEP_FILE = CMakeFiles/tests.dir/tests.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/tests.dir
+  OBJECT_FILE_DIR = CMakeFiles/tests.dir
+
+build CMakeFiles/tests.dir/json.cpp.o: CXX_COMPILER__tests_unscanned_Debug /Users/marko/CLionProjects/JSON-Parser/json.cpp || cmake_object_order_depends_target_tests
+  DEP_FILE = CMakeFiles/tests.dir/json.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/tests.dir
+  OBJECT_FILE_DIR = CMakeFiles/tests.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target tests
+
+
+#############################################
+# Link the executable tests
+
+build tests: CXX_EXECUTABLE_LINKER__tests_Debug CMakeFiles/tests.dir/tests.cpp.o CMakeFiles/tests.dir/json.cpp.o
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk
+  OBJECT_DIR = CMakeFiles/tests.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = tests
+  TARGET_PDB = tests.dbg
+
 
 #############################################
 # Utility command for edit_cache
@@ -111,7 +148,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /Users/marko/CLionProjects/JSON-Parser/cmake-build-debug
 
-build all: phony JSON-Parser
+build all: phony JSON-Parser tests
 
 # =============================================================================
 # Built-in targets

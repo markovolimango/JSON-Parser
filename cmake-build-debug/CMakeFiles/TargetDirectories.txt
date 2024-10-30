@@ -1,3 +1,4 @@
 /Users/marko/CLionProjects/JSON-Parser/cmake-build-debug/CMakeFiles/JSON-Parser.dir
+/Users/marko/CLionProjects/JSON-Parser/cmake-build-debug/CMakeFiles/tests.dir
 /Users/marko/CLionProjects/JSON-Parser/cmake-build-debug/CMakeFiles/edit_cache.dir
 /Users/marko/CLionProjects/JSON-Parser/cmake-build-debug/CMakeFiles/rebuild_cache.dir

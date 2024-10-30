@@ -15,7 +15,8 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -30,7 +31,8 @@
 					"name" : "JSON-Parser",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -41,6 +43,13 @@
 					"id" : "JSON-Parser::@6890427a1f51a3e7e1df",
 					"jsonFile" : "target-JSON-Parser-Debug-6df5b49ea1619b98f2d9.json",
 					"name" : "JSON-Parser",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tests-Debug-3ee8579b05e9e5c7ec0a.json",
+					"name" : "tests",
 					"projectIndex" : 0
 				}
 			]

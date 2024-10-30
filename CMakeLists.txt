@@ -7,3 +7,6 @@ add_executable(JSON-Parser main.cpp
         json.h
         json.cpp
 )
+add_executable(tests tests.cpp
+        json.h
+        json.cpp)
