@@ -10,15 +10,23 @@ int main() {
     std::string text = buffer.str();
     json::Object root;
     int i = 0, j = 0;
-    root = json::parseObject(text, i);
+    try {
+        root = json::parseObject(text, i);
 
-    std::string s;
-    std::getline(std::cin, s);
-    i = 0;
+        std::string s;
+        std::getline(std::cin, s);
+        i = 0;
 
-    json::Element e;
-    e = json::readElement(root, s, i);
-    std::cout << json::to_string(e) << std::endl;
+        json::Element e;
+        try {
+            e = json::readElement(root, s, i);
+        } catch (const json::Error &erke) {
+            std::cerr << erke.what() << std::endl;
+        }
+        std::cout << json::to_string(e) << std::endl;
+    } catch (const json::Error &erke) {
+        std::cerr << erke.what() << std::endl;
+    }
 }
 
 

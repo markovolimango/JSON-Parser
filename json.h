@@ -77,4 +77,24 @@ namespace json {
     float readMin(const json::Object &root, const std::string &input, int &pos);
 
     json::Element readElement(const json::Object &root, const std::string &input, int &pos);
+
+    class Error : public std::exception {
+    protected:
+        std::string msg;
+
+    public:
+        Error(const std::string &message);
+
+        const char *what() const noexcept override;
+    };
+
+    class JSONError : public Error {
+    public:
+        JSONError(const std::string &message);
+    };
+
+    class ExpressionError : public Error {
+    public:
+        ExpressionError(const std::string &message);
+    };
 }
