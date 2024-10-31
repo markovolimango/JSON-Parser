@@ -47,7 +47,7 @@ namespace json {
 
 
     void skipEmpty(const std::string &text, int &pos) {
-        while (text[pos] == ' ' || text[pos] == '\n') {
+        while ((text[pos] == ' ' || text[pos] == '\n') && pos < text.length()) {
             pos++;
         }
     }
@@ -135,7 +135,9 @@ namespace json {
         if (text[pos] != '{') {
             throw JSONError("Missing opening curly bracket.");
         }
+        pos++;
         while (text[pos] != '}') {
+            skipEmpty(text, pos);
             if (text[pos] == '"') {
                 if (pos > text.size()) {
                     throw JSONError("Missing closing curly bracket.");
@@ -148,13 +150,13 @@ namespace json {
                     pos++;
                 }
                 pos++;
-                while (text[pos] == ' ' || text[pos] == '\n') {
-                    pos++;
-                }
+                skipEmpty(text, pos);
                 const Element element = parseElement(text, pos);
                 res.data[name] = element;
-            } else {
+            } else if (text[pos] == ',' || text[pos] == '}') {
                 pos++;
+            } else {
+                throw JSONError("Invalid character.");
             }
         }
         if (text[pos] == '}') {

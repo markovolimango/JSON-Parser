@@ -4,30 +4,39 @@
 #include "json.h"
 
 int main() {
-    std::ifstream json("text.json");
+    std::string filename, text, input;
     std::stringstream buffer;
-    buffer << json.rdbuf();
-    std::string text = buffer.str();
     json::Object root;
-    int i = 0, j = 0;
+    json::Element res;
+    std::ifstream file;
+
+    std::cin >> filename;
+    file.open(filename);
+    if (!file) {
+        std::cerr << "Error opening file " << filename << "." << std::endl;
+        return 1;
+    }
+    buffer << file.rdbuf();
+    text = buffer.str();
+    int i = 0;
     try {
         root = json::parseObject(text, i);
     } catch (const json::Error &erke) {
         std::cerr << erke.what() << std::endl;
-        exit(1);
+        return 1;
     }
-    std::string s;
-    std::getline(std::cin, s);
-    i = 0;
 
-    json::Element e;
+    std::cin >> input;
+    i = 0;
     try {
-        e = json::readElement(root, s, i);
+        res = json::readElement(root, input, i);
     } catch (const json::Error &erke) {
         std::cerr << erke.what() << std::endl;
-        exit(1);
+        return 1;
     }
-    std::cout << json::to_string(e) << std::endl;
+    std::cout << json::to_string(res) << std::endl;
+
+    return 0;
 }
 
 
