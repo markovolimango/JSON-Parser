@@ -5,9 +5,12 @@ A C++ app that parses JSON and evaluates user expressions.
 ## Features
 
 - Evaluating trivial expressions with JSON paths
-- min(), max() and size() functions
+- min() and max() functions
+    - Work with an array or multiple arguments
+- size() function
+    - Works with arrays and objects
 - Expressions and functions in the subscript operator []
-- Functions in functions in functions in...
+    - Allow for recursive function and expression calls
 
 ## Getting Started
 
@@ -16,7 +19,18 @@ A C++ app that parses JSON and evaluates user expressions.
 - CMake 3.29 or later
 
 ### Buidling the Project
-1. Clone the repository
-2. Build the project using CMake
+- Clone the repository.
+- Build the project using CMake.
 
-### Running the parser
+### Running the expression evaluation
+- Place your JSON file in the same directory as the executable.
+- Run the *json_eval* executable and input the file name and expression:  
+```console
+./json_eval [filename] [expression]
+```
+
+### Running the tests
+- Just run the *tests* executable:
+```console
+./tests
+```
