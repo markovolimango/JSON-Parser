@@ -10,7 +10,8 @@ int main() {
     json::Element res;
     std::ifstream file;
 
-    std::cin >> filename;
+    //std::cin >> filename;
+    filename = "text.json";
     file.open(filename);
     if (!file) {
         std::cerr << "Error opening file " << filename << "." << std::endl;
@@ -27,7 +28,21 @@ int main() {
     }
 
     std::cin >> input;
+
     i = 0;
+    size_t op = json::findOperation(input);
+    if (op != std::string::npos) {
+        float x;
+        try {
+            x = json::performOperation(root, input, op);
+        } catch (const json::Error &error) {
+            std::cerr << error.what() << std::endl;
+            return 1;
+        }
+        std::cout << json::to_string(x) << std::endl;
+        return 0;
+    }
+
     try {
         res = json::readElement(root, input, i);
     } catch (const json::Error &error) {
