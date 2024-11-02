@@ -339,7 +339,7 @@ int readIndex(const Object &root, const std::string &input, int &pos) {
     }
     res = std::get<int>(number);
     if (input[pos] != ']') {
-      exit(1);
+      throw ExpressionError();
     }
     pos++;
   } else {
@@ -358,6 +358,10 @@ int readIndex(const Object &root, const std::string &input, int &pos) {
     } else {
       res = element.getInt();
     }
+    if (input[pos] != ']') {
+      throw ExpressionError();
+    }
+    pos++;
   }
   if (res < 0) {
     throw ExpressionError();
@@ -409,9 +413,6 @@ Element readElement(const Object &root, const std::string &input, int &pos) {
         res = data[name];
       }
     }
-  }
-  if (input[pos] == ']') {
-    pos++;
   }
   skipEmpty(input, pos);
   return res;
