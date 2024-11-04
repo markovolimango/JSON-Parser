@@ -46,10 +46,18 @@ make
 ./json_eval
 [filename] [expression]
 ```
-Example:
+Examples:
 ```bash
 ./json_eval
 test.json a.b[1]
+```
+```bash
+./json_eval
+test.json a.b[max(0,a.b[1])]
+```
+```bash
+./json_eval
+test.json a.b[3][1]+a.b[size(a)]
 ```
 
 ### Running the tests
