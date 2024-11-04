@@ -43,7 +43,13 @@ make
 - Place your JSON file in the build directory.
 - Run the *json_eval* executable and input the file name and expression.
 ```bash
-./json_eval [filename] [expression]
+./json_eval
+[filename] [expression]
+```
+Example:
+```bash
+./json_eval
+test.json a.b[1]
 ```
 
 ### Running the tests
