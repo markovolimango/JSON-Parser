@@ -10,7 +10,8 @@ A C++ app that parses JSON and evaluates user expressions.
 - size() function
     - Works with arrays and objects
 - Expressions and functions in the subscript operator []
-    - Allow for recursive function and expression calls
+    - Allows for recursive function and expression calls
+- Binary arithmetic operations with expressions
 
 ## Getting Started
 
@@ -20,17 +21,33 @@ A C++ app that parses JSON and evaluates user expressions.
 
 ### Buidling the Project
 - Clone the repository.
-- Build the project using CMake.
+```bash
+git clone https://github.com/markovolimango/JSON-Parser.git
+```
+- Create a build directory and navigate to it.
+```bash
+cd JSON-Parser
+mkdir build
+cd build
+```
+- Generate the build files using CMake.
+```bash
+cmake ..
+```
+- Build the project.
+```bash
+make
+```
 
 ### Running the expression evaluation
-- Place your JSON file in the same directory as the executable.
-- Run the *json_eval* executable and input the file name and expression:  
-```console
+- Place your JSON file in the build directory.
+- Run the *json_eval* executable and input the file name and expression.
+```bash
 ./json_eval [filename] [expression]
 ```
 
 ### Running the tests
-- Just run the *tests* executable:
-```console
+- Just run the *tests* executable.
+```bash
 ./tests
 ```
