@@ -2,113 +2,144 @@
 #include "json.h"
 
 class Tests {
-private:
-    void printResult(const std::string &testName, bool passed) {
+    static void printResult(const std::string &testName, bool passed) {
         std::cout << testName << ": " << (passed ? "PASSED" : "FAILED") << std::endl;
     }
 
-    bool runInvalidJSONTest(const std::string &text) {
+    static bool runInvalidJSONTest(const std::string &text) {
         bool res;
         try {
             int pos = 0;
             json::Object obj = json::parseObject(text, pos);
             res = false;
-        } catch (const json::Error &e) {
+        } catch ([[maybe_unused]] const json::JSONError &e) {
             res = true;
         }
         return res;
     }
 
-    bool runValidJSONTest(const std::string text, const std::string result) {
-        int pos = 0;
+    static bool runValidJSONTest(const std::string &text, const std::string &expectedResult) {
         try {
-            json::Object obj = json::parseObject(text, pos);
-            return json::to_string(obj) == result;
-        } catch (const json::Error &e) {
+            int pos = 0;
+            const json::Object obj = json::parseObject(text, pos);
+            return to_string(obj) == expectedResult;
+        } catch ([[maybe_unused]] const json::JSONError &e) {
             return false;
         }
     }
 
-    bool runInvalidExpressionTest(const json::Object &root, const std::string input) {
+    static bool runInvalidExpressionTest(const json::Object &root, const std::string &input) {
         try {
             int pos = 0;
-            json::Element e = json::readElement(root, input, pos);
+            json::Element element = readElement(root, input, pos);
             return false;
-        } catch (const json::ExpressionError &error) {
+        } catch ([[maybe_unused]] const json::ExpressionError &e) {
             return true;
         }
     }
 
-    bool runValidExpressionTest(json::Object root, std::string input, const std::string result) {
-        int pos = 0;
+    static bool runValidExpressionTest(const json::Object &root, const std::string &input,
+                                       const std::string &expectedResult) {
         try {
-            json::Element element = json::readElement(root, input, pos);
-            return json::to_string(element) == result;
-        } catch (const json::ExpressionError &error) {
+            int pos = 0;
+            const json::Element element = readElement(root, input, pos);
+            return to_string(element) == expectedResult;
+        } catch ([[maybe_unused]] const json::ExpressionError &e) {
+            return false;
+        }
+    }
+
+    static bool runOperationTest(const json::Object &root, const std::string &input, const float expectedResult) {
+        const size_t op = json::findOperation(input);
+        try {
+            float x = performOperation(root, input, op);
+            return x == expectedResult;
+        } catch ([[maybe_unused]] const json::ExpressionError &e) {
             return false;
         }
     }
 
 public:
-    void testInvalidJSON() {
+    static void testInvalidJSON() {
+        std::cout << "INVALID JSON" << std::endl;
+
         printResult("Empty JSON", runInvalidJSONTest(""));
 
-        printResult("Missing closing curly bracket in JSON", runInvalidJSONTest(R"({"marko":"wahoo")"));
+        printResult("Missing closing curly bracket in JSON", runInvalidJSONTest(R"({"marko":"yahoo")"));
 
-        printResult("Invalid number in JSON", "{\"a\":1.45.56}");
+        printResult("Invalid number in JSON", runInvalidJSONTest("{\"a\":1.45.56}"));
 
-        printResult("Missing closing square bracket in JSON", "{\"a\":[1,2,3}");
-
-        std::cout << std::endl;
-    }
-
-    void testValidJSON() {
-        bool t;
-
-        t = runValidJSONTest(R"({"a": { "b"  : [ 1.000, 2.34, { "c": "test" }, [11, 12] ], "d": -9 }})",
-                             R"({"a": {"b": [1, 2.34, {"c": test}, [11, 12]], "d": -9}})");
-        printResult("Valid JSON 1", t);
+        printResult("Missing closing square bracket in JSON", runInvalidJSONTest("{\"a\":[1,2,3}"));
 
         std::cout << std::endl;
     }
 
-    void testInvalidExpressions() {
-        std::string text = R"({"a": { "b"  : [ 1.000, 2.34, { "c": "test" }, [11, 12] ], "d": -9 }})";
+    static void testValidJSON() {
+        std::cout << "VALID JSON" << std::endl;
+
+        bool passed = runValidJSONTest(R"({"a": { "b"  : [ 1.000, 2.34, { "c": "test" }, [11, 12] ], "d": -9 }})",
+                                       R"({"a": {"b": [1, 2.34, {"c": "test"}, [11, 12]], "d": -9}})");
+        printResult("Multiple objects and arrays", passed);
+
+        passed = runValidJSONTest(R"({"marko":"volimango","longname":[1,2,"three"]})",
+                                  R"({"longname": [1, 2, "three"], "marko": "volimango"})");
+        printResult("Longer object names", passed);
+
+        passed = runValidJSONTest(R"({"arr":[{"a":1,"b":2},{"c":3},{"d":4}]})",
+                                  R"({"arr": [{"a": 1, "b": 2}, {"c": 3}, {"d": 4}]})");
+        printResult("Array of objects", passed);
+
+        std::cout << std::endl;
+    }
+
+    static void testInvalidExpressions() {
+        std::cout << "INVALID EXPRESSIONS" << std::endl;
+
+        std::string text = R"({"a": { "b"  : [ 1, 2.34, { "c": "test" }, [11, 12] ], "d": -9 }})";
         int pos = 0;
         json::Object obj = json::parseObject(text, pos);
 
-        printResult("Object as index expression", runInvalidExpressionTest(obj, "a.b[a.b[2]]"));
+        printResult("Object as index", runInvalidExpressionTest(obj, "a.b[a.b[2]]"));
 
-        printResult("Non-existent object in expression", runInvalidExpressionTest(obj, "a.c"));
+        printResult("Non-existent object", runInvalidExpressionTest(obj, "a.c"));
 
-        printResult("max of non-array", runInvalidExpressionTest(obj, "max(a.b[2])"));
+        printResult("Max of non-array", runInvalidExpressionTest(obj, "max(a.b[2])"));
 
-        printResult("max of non-numbers", runInvalidExpressionTest(obj, "max(1,2,a.b)"));
+        printResult("Min of non-numbers", runInvalidExpressionTest(obj, "min(1,2,a.b)"));
+
+        text = R"({"arr":[{"a":1,"b":2},{"c":3},{"d":4}]})";
+        pos = 0;
+        obj = json::parseObject(text, pos);
+
+        printResult("Multiplication sign in the wrong place", runInvalidExpressionTest(obj, "arr[0].*aarr[1].c"));
 
         std::cout << std::endl;
     }
 
-    void testValidExpressions() {
+    static void testValidExpressions() {
+        std::cout << "VALID EXPRESSIONS" << std::endl;
+
         std::string text = R"({"a": { "b"  : [ 1, 2.34, { "c": "test" }, [11, 12] ], "d": -9 }})";
         int pos = 0;
         json::Object obj = json::parseObject(text, pos);
 
         printResult("Min of elements as array index",
-                    runValidExpressionTest(obj, "a.b[min(a.b[1],a.b[3][1],2)]", R"({"c": test})"));
+                    runValidExpressionTest(obj, "a.b[min(a.b[1],a.b[3][1],2)]", R"({"c": "test"})"));
 
-        printResult("Max of elements as array index",
-                    runValidExpressionTest(obj, "a.b[3][max(0,a.b[0])]", R"(12)"));
+        printResult("Max of elements as array index", runValidExpressionTest(obj, "a.b[3][max(0,a.b[0])]", R"(12)"));
 
-        printResult("Size of an object",
-                    runValidExpressionTest(obj, "size(a)", R"(2)"));
+        printResult("Size of an object", runValidExpressionTest(obj, "size(a)", R"(2)"));
 
-        printResult("Object in array in object",
-                    runValidExpressionTest(obj, "a.b[2].c", R"(test)"));
+        printResult("Object in array in object", runValidExpressionTest(obj, "a.b[2].c", R"("test")"));
+
+        printResult("Multiplication", runOperationTest(obj, "a.d*a.b[3][1]", -108));
+
+        printResult("Addition with functions", runOperationTest(obj, "max(a.b[0],a.b[1],1.89)+size(a)", 4.34));
 
         std::cout << std::endl;
     }
 
-    void test() {
+    static void test() {
         testInvalidJSON();
         testValidJSON();
         testInvalidExpressions();
@@ -117,7 +148,6 @@ public:
 };
 
 int main() {
-    Tests tests;
-    tests.test();
+    Tests::test();
     return 0;
 }
