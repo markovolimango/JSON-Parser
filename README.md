@@ -13,7 +13,7 @@ A C++ app that parses JSON and evaluates user expressions.
     - Allows for recursive function and expression calls
 - Binary arithmetic operations with expressions
 
-## Getting Started
+## Using the Application
 
 ### Prerequisites
 - C++ 20 or later
@@ -43,7 +43,21 @@ make
 - Place your JSON file in the build directory.
 - Run the *json_eval* executable and input the file name and expression.
 ```bash
-./json_eval [filename] [expression]
+./json_eval
+[filename] [expression]
+```
+Examples:
+```bash
+./json_eval
+test.json a.b[1]
+```
+```bash
+./json_eval
+test.json a.b[max(0,a.b[1])]
+```
+```bash
+./json_eval
+test.json a.b[3][1]+a.b[size(a)]
 ```
 
 ### Running the tests
