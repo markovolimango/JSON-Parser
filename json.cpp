@@ -320,6 +320,8 @@ namespace json {
             res = static_cast<int>(element.getVector().size());
         } else if (element.isObjectPtr()) {
             res = static_cast<int>(element.getObjectPtr()->data.size());
+        } else if (element.isString()) {
+            res = static_cast<int>(element.getString().size());
         } else {
             throw ExpressionError();
         }
