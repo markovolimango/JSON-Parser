@@ -13,7 +13,7 @@ A C++ app that parses JSON and evaluates user expressions.
     - Allows for recursive function and expression calls
 - Binary arithmetic operations with expressions
 
-## Getting Started
+## Using the Application
 
 ### Prerequisites
 - C++ 20 or later
