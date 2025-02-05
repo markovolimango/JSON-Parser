@@ -3,13 +3,11 @@ project(JSON-Parser)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(JSON-Parser main.cpp
-        json.h
-        json.cpp
+add_executable(json-eval src/main.cpp
+        include/json.h
+        src/json.cpp
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "json_eval")
-
-add_executable(tests tests.cpp
-        json.h
-        json.cpp)
+add_executable(tests tests/tests.cpp
+        include/json.h
+        src/json.cpp)

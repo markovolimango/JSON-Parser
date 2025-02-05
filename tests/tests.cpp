@@ -1,5 +1,5 @@
 #include <iostream>
-#include "json.h"
+#include "../include/json.h"
 
 class Tests {
     static void printResult(const std::string &testName, bool passed) {

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <sstream>
-#include "json.h"
+#include "../include/json.h"
 
 int main() {
     std::string filename, text, input;
